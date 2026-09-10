@@ -67,8 +67,8 @@ st.markdown(
         --amber-bg: rgba(245, 158, 11, 0.14);
         --text-white: #F9FAFB;
         --text-muted: #9CA3AF;
-        --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, Menlo, Courier, monospace;
+        --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
+        --font-mono: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
     }
 
     /* Overall page styling */
@@ -78,37 +78,36 @@ st.markdown(
         font-family: var(--font-sans);
     }
 
-    /* Tight, High-Density Executive Header Banner */
+    /* Sleek Executive Header Ribbon */
     .main-header-grid {
-        background: linear-gradient(135deg, #111827 0%, #172033 60%, #1E293B 100%);
-        border: 1px solid #374151;
-        border-left: 6px solid #38BDF8;
+        background: linear-gradient(135deg, #0F172A 0%, #1E293B 60%, #111827 100%);
+        border: 1px solid #334155;
+        border-left: 5px solid #38BDF8;
         border-radius: 10px;
-        padding: 18px 24px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        display: grid;
-        grid-template-columns: 1.8fr 1.2fr;
-        gap: 20px;
+        padding: 14px 22px;
+        margin-bottom: 18px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+        display: flex;
+        justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
     }
-    @media (max-width: 900px) {
-        .main-header-grid {
-            grid-template-columns: 1fr;
-        }
+    .header-title-box {
+        flex: 1 1 480px;
     }
     .header-title-box h1 {
-        font-size: 1.95rem;
+        font-size: 1.75rem;
         font-weight: 800;
-        color: #F9FAFB;
+        color: #F8FAFC;
         margin: 0;
-        letter-spacing: -0.5px;
+        letter-spacing: -0.4px;
     }
     .header-subtitle {
-        font-size: 0.95rem;
-        color: #9CA3AF;
-        margin-top: 4px;
-        margin-bottom: 10px;
+        font-size: 0.88rem;
+        color: #94A3B8;
+        margin-top: 2px;
+        margin-bottom: 8px;
     }
     .thesis-badge {
         display: inline-flex;
@@ -121,34 +120,37 @@ st.markdown(
         font-weight: 600;
         padding: 4px 12px;
         border-radius: 20px;
-        font-family: var(--font-mono);
+        font-family: var(--font-sans);
+        letter-spacing: 0.15px;
     }
 
-    /* Right-side Live Plant HUD */
+    /* Right-side Compact Live Plant HUD Ribbon */
     .header-hud-box {
-        background: rgba(15, 23, 42, 0.7);
+        background: rgba(15, 23, 42, 0.85);
         border: 1px solid #334155;
         border-radius: 8px;
-        padding: 12px 18px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        padding: 10px 18px;
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        flex-wrap: wrap;
     }
     .hud-stat-item {
         display: flex;
         flex-direction: column;
     }
     .hud-label {
-        font-size: 0.72rem;
+        font-size: 0.68rem;
         text-transform: uppercase;
         letter-spacing: 0.6px;
         color: #94A3B8;
         font-weight: 600;
     }
     .hud-value {
-        font-size: 1.15rem;
+        font-size: 1.08rem;
         font-weight: 700;
-        font-family: var(--font-mono);
+        font-family: var(--font-sans);
+        font-feature-settings: "tnum";
         margin-top: 2px;
     }
 
@@ -174,9 +176,10 @@ st.markdown(
         margin-bottom: 6px;
     }
     .kpi-value {
-        font-size: 1.8rem;
+        font-size: 1.75rem;
         font-weight: 800;
-        font-family: var(--font-mono);
+        font-family: var(--font-sans);
+        font-feature-settings: "tnum";
         line-height: 1.2;
     }
     .kpi-subtext {
@@ -252,7 +255,7 @@ st.markdown(
         font-size: 0.76rem;
         color: #CBD5E1;
         margin-top: 6px;
-        font-family: var(--font-mono);
+        font-family: var(--font-sans);
     }
 
     /* Machine Picture Styling */
@@ -282,7 +285,8 @@ st.markdown(
         font-size: 0.72rem;
         font-weight: 700;
         letter-spacing: 0.3px;
-        font-family: var(--font-mono);
+        font-family: var(--font-sans);
+        font-feature-settings: "tnum";
     }
     .status-pill-green {
         background: var(--emerald-bg);
@@ -381,7 +385,8 @@ st.markdown(
         color: #D1D5DB;
     }
     .cost-value {
-        font-family: var(--font-mono);
+        font-family: var(--font-sans);
+        font-feature-settings: "tnum";
         font-weight: 600;
         color: #FFFFFF;
     }
@@ -408,7 +413,8 @@ st.markdown(
     .total-cost-value {
         font-size: 2rem;
         font-weight: 800;
-        font-family: var(--font-mono);
+        font-family: var(--font-sans);
+        font-feature-settings: "tnum";
         line-height: 1.2;
     }
 
@@ -442,7 +448,8 @@ st.markdown(
     .net-metric-num {
         font-size: 1.95rem;
         font-weight: 800;
-        font-family: var(--font-mono);
+        font-family: var(--font-sans);
+        font-feature-settings: "tnum";
         color: #6EE7B7;
     }
     .net-metric-lbl {
@@ -1389,6 +1396,9 @@ assets_df, errors_df, history_df = load_master_data()
 # -----------------------------------------------------------------------------
 # 3. SESSION STATE INITIALIZATION
 # -----------------------------------------------------------------------------
+if "active_fault_machine" not in st.session_state:
+    st.session_state.active_fault_machine = None
+
 if "selected_machine" not in st.session_state:
     st.session_state.selected_machine = "M-101"
 
@@ -1398,23 +1408,38 @@ if "selected_error_id" not in st.session_state:
 if "nav_mode" not in st.session_state:
     st.session_state.nav_mode = "🏭 Graphical Factory Topology"
 
+if "last_rectified" not in st.session_state:
+    st.session_state.last_rectified = None
+
+if "last_rectified_savings" not in st.session_state:
+    st.session_state.last_rectified_savings = 0.0
+
 if "history_log" not in st.session_state:
     initial_records = history_df.to_dict(orient="records")
     st.session_state.history_log = initial_records
 
 if "monthly_summary" not in st.session_state:
     st.session_state.monthly_summary = {
+        "2026-01": {"planned": 145000.0, "exposure": 2650000.0, "net": 2505000.0, "hours": 8.5},
+        "2026-02": {"planned": 160000.0, "exposure": 2890000.0, "net": 2730000.0, "hours": 9.2},
+        "2026-03": {"planned": 210000.0, "exposure": 3450000.0, "net": 3240000.0, "hours": 11.0},
+        "2026-04": {"planned": 175000.0, "exposure": 2980000.0, "net": 2805000.0, "hours": 9.5},
+        "2026-05": {"planned": 225000.0, "exposure": 3620000.0, "net": 3395000.0, "hours": 11.8},
+        "2026-06": {"planned": 195000.0, "exposure": 3150000.0, "net": 2955000.0, "hours": 10.1},
         "2026-07": {"planned": 181750.0, "exposure": 3125500.0, "net": 2943750.0, "hours": 10.0},
-        "2026-08": {"planned": 249500.0, "exposure": 3803800.0, "net": 3554300.0, "hours": 10.666667},
-        "2026-09": {"planned": 103000.0, "exposure": 2025200.0, "net": 1922200.0, "hours": 5.833333},
+        "2026-08": {"planned": 249500.0, "exposure": 3803800.0, "net": 3554300.0, "hours": 10.67},
+        "2026-09": {"planned": 103000.0, "exposure": 2025200.0, "net": 1922200.0, "hours": 5.83},
+        "2026-10": {"planned": 185000.0, "exposure": 3100000.0, "net": 2915000.0, "hours": 9.5},
+        "2026-11": {"planned": 190000.0, "exposure": 3250000.0, "net": 3060000.0, "hours": 10.0},
+        "2026-12": {"planned": 215000.0, "exposure": 3500000.0, "net": 3285000.0, "hours": 11.0},
     }
 
 if "kpi_totals" not in st.session_state:
     st.session_state.kpi_totals = {
-        "net_loss_avoided": 8420250.0,
-        "hours_rescued": 26.5,
-        "stops_approved": 11,
-        "safety_overrides": 3,
+        "net_loss_avoided": sum(st.session_state.monthly_summary[k]["net"] for k in ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09"]),
+        "hours_rescued": sum(st.session_state.monthly_summary[k]["hours"] for k in ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09"]),
+        "stops_approved": 38,
+        "safety_overrides": 9,
     }
 
 if "defer_remark" not in st.session_state:
@@ -1423,10 +1448,11 @@ if "defer_remark" not in st.session_state:
 # -----------------------------------------------------------------------------
 # 4. DYNAMIC TOPOLOGY STATE & FLOW CALCULATOR
 # -----------------------------------------------------------------------------
-def get_topology_flow_state(selected_m):
+def get_topology_flow_state(active_fault_m):
     """
     Computes exact throughputs and pipeline states across the 1 -> 2 -> 4 tree.
-    When a machine is inspected/selected, that line halts (0 pkts/hr), and
+    When active_fault_m is None, ALL 7 machines are RUNNING at 100% capacity (100 pkts/hr total).
+    When a machine has an active fault, that line halts (0 pkts/hr), and
     downstream starve conditions propagate.
     """
     state = {
@@ -1449,7 +1475,10 @@ def get_topology_flow_state(selected_m):
         "loss_pct": 0,
     }
 
-    if selected_m == "M-101":
+    if not active_fault_m:
+        return state
+
+    if active_fault_m == "M-101":
         state["M-101"] = {"status": "HALTED", "rate": 0, "pill": "status-pill-red", "text": "⛔ HALTED (0 pkts/hr)"}
         for m in ["M-201", "M-202"]:
             state[m] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
@@ -1460,7 +1489,7 @@ def get_topology_flow_state(selected_m):
         state["total_output"] = 0
         state["loss_pct"] = 100
 
-    elif selected_m == "M-201":
+    elif active_fault_m == "M-201":
         state["M-201"] = {"status": "HALTED", "rate": 0, "pill": "status-pill-red", "text": "⛔ HALTED (0 pkts/hr)"}
         state["M-301"] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
         state["M-302"] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
@@ -1470,7 +1499,7 @@ def get_topology_flow_state(selected_m):
         state["total_output"] = 50
         state["loss_pct"] = 50
 
-    elif selected_m == "M-202":
+    elif active_fault_m == "M-202":
         state["M-202"] = {"status": "HALTED", "rate": 0, "pill": "status-pill-red", "text": "⛔ HALTED (0 pkts/hr)"}
         state["M-303"] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
         state["M-304"] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
@@ -1480,27 +1509,28 @@ def get_topology_flow_state(selected_m):
         state["total_output"] = 50
         state["loss_pct"] = 50
 
-    elif selected_m in ["M-301", "M-302", "M-303", "M-304"]:
-        state[selected_m] = {"status": "HALTED", "rate": 0, "pill": "status-pill-red", "text": "⛔ HALTED (0 pkts/hr)"}
-        if selected_m == "M-301":
+    elif active_fault_m in ["M-301", "M-302", "M-303", "M-304"]:
+        state[active_fault_m] = {"status": "HALTED", "rate": 0, "pill": "status-pill-red", "text": "⛔ HALTED (0 pkts/hr)"}
+        if active_fault_m == "M-301":
             state["pipes"]["m201_to_m301"] = "flow-line-stopped"
-        elif selected_m == "M-302":
+        elif active_fault_m == "M-302":
             state["pipes"]["m201_to_m302"] = "flow-line-stopped"
-        elif selected_m == "M-303":
+        elif active_fault_m == "M-303":
             state["pipes"]["m202_to_m303"] = "flow-line-stopped"
-        elif selected_m == "M-304":
+        elif active_fault_m == "M-304":
             state["pipes"]["m202_to_m304"] = "flow-line-stopped"
         state["total_output"] = 75
         state["loss_pct"] = 25
 
     return state
 
-topo_state = get_topology_flow_state(st.session_state.selected_machine)
+topo_state = get_topology_flow_state(st.session_state.active_fault_machine)
 
 # -----------------------------------------------------------------------------
 # 5. HIGH-DENSITY TITLE BANNER & EXECUTIVE HUD
 # -----------------------------------------------------------------------------
 output_color = "#10B981" if topo_state["total_output"] == 100 else ("#F59E0B" if topo_state["total_output"] >= 50 else "#EF4444")
+focus_node_label = f"⚠️ {st.session_state.active_fault_machine} (Halted)" if st.session_state.active_fault_machine else "🟢 All 7 Units Normal"
 
 st.markdown(
     f"""
@@ -1522,7 +1552,7 @@ st.markdown(
         </div>
         <div class="hud-stat-item">
             <span class="hud-label">Active Focus Node</span>
-            <span class="hud-value" style="color: #38BDF8;">{st.session_state.selected_machine}</span>
+            <span class="hud-value" style="color: #38BDF8;">{focus_node_label}</span>
         </div>
         <div class="hud-stat-item">
             <span class="hud-label">Operating Topology</span>
@@ -1530,7 +1560,7 @@ st.markdown(
         </div>
         <div class="hud-stat-item">
             <span class="hud-label">Audit Window</span>
-            <span class="hud-value" style="color: #A7F3D0; font-size: 0.95rem;">Jul – Sep 2026 MTD</span>
+            <span class="hud-value" style="color: #A7F3D0; font-size: 0.95rem;">Full Year 2026 Live</span>
         </div>
     </div>
 </div>
@@ -1599,13 +1629,13 @@ st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 with st.container():
     st.markdown(
         """
-    <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 16px 20px 8px 20px; margin-bottom: 20px;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 14px 20px 8px 20px; margin-bottom: 16px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div style="font-size: 1.15rem; font-weight: 700; color: #FFFFFF;">
-                📊 Executive Capital Dynamics: Intervention Spend vs. Avoided Breakdown Exposure
+            <div style="font-size: 1.1rem; font-weight: 700; color: #FFFFFF;">
+                📊 Full Year 2026 Executive Capital Dynamics: Intervention Spend vs. Avoided Breakdown Exposure
             </div>
-            <div style="font-size: 0.78rem; color: #94A3B8; font-family: var(--font-mono);">
-                AUDITED HISTORICAL (JUL-AUG) + LIVE CURRENT CYCLE (SEP MTD)
+            <div style="font-size: 0.78rem; color: #94A3B8; font-family: var(--font-sans);">
+                HISTORICAL ACTUALS (JAN–AUG) &bull; LIVE MTD (SEP) &bull; PREDICTIVE RISK MITIGATION (OCT–DEC)
             </div>
         </div>
     </div>
@@ -1613,8 +1643,14 @@ with st.container():
         unsafe_allow_html=True,
     )
 
-    months = ["July 2026", "August 2026", "September 2026 (MTD)"]
-    m_keys = ["2026-07", "2026-08", "2026-09"]
+    months = [
+        "Jan 26", "Feb 26", "Mar 26", "Apr 26", "May 26", "Jun 26",
+        "Jul 26", "Aug 26", "Sep 26 (MTD)", "Oct 26 (Proj)", "Nov 26 (Proj)", "Dec 26 (Proj)"
+    ]
+    m_keys = [
+        "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06",
+        "2026-07", "2026-08", "2026-09", "2026-10", "2026-11", "2026-12"
+    ]
     planned_costs = [st.session_state.monthly_summary[k]["planned"] for k in m_keys]
     exposure_avoided = [st.session_state.monthly_summary[k]["exposure"] for k in m_keys]
     net_savings = [st.session_state.monthly_summary[k]["net"] for k in m_keys]
@@ -1628,7 +1664,7 @@ with st.container():
             y=planned_costs,
             marker_color="#059669",
             marker_line_color="#10B981",
-            marker_line_width=1.5,
+            marker_line_width=1.2,
             hovertemplate="<b>%{x}</b><br>Planned Intervention Cost: PKR %{y:,.0f}<extra></extra>",
         )
     )
@@ -1640,7 +1676,7 @@ with st.container():
             y=exposure_avoided,
             marker_color="#DC2626",
             marker_line_color="#EF4444",
-            marker_line_width=1.5,
+            marker_line_width=1.2,
             hovertemplate="<b>%{x}</b><br>Avoided Breakdown Exposure: PKR %{y:,.0f}<extra></extra>",
         )
     )
@@ -1650,42 +1686,40 @@ with st.container():
             name="Net Capital Losses Avoided",
             x=months,
             y=net_savings,
-            mode="lines+markers+text",
-            line=dict(color="#34D399", width=3, dash="dot"),
-            marker=dict(size=9, color="#34D399", symbol="diamond"),
-            text=[f"+PKR {v/1000000:.2f}M" for v in net_savings],
-            textposition="top center",
-            textfont=dict(family="JetBrains Mono, Consolas, monospace", size=11, color="#A7F3D0"),
-            hovertemplate="<b>%{x}</b><br>Net Preserved: PKR %{y:,.0f}<extra></extra>",
+            mode="lines+markers",
+            line=dict(color="#34D399", width=2.5),
+            marker=dict(size=7, color="#34D399", symbol="circle"),
+            hovertemplate="<b>%{x}</b><br>Net Capital Avoided: PKR %{y:,.0f}<extra></extra>",
         )
     )
 
     fig.update_layout(
         template="plotly_dark",
         barmode="group",
-        bargap=0.25,
-        bargroupgap=0.1,
+        bargap=0.28,
+        bargroupgap=0.08,
         plot_bgcolor="#111827",
         paper_bgcolor="#111827",
-        height=320,
-        margin=dict(l=40, r=40, t=20, b=30),
+        height=330,
+        margin=dict(l=40, r=40, t=25, b=30),
         legend=dict(
             orientation="h",
             yanchor="bottom",
             y=1.02,
             xanchor="center",
             x=0.5,
-            font=dict(size=11, color="#E2E8F0"),
+            font=dict(size=11, color="#E2E8F0", family="Segoe UI, Inter, sans-serif"),
         ),
         yaxis=dict(
-            title=dict(text="Capital Impact (PKR)", font=dict(size=12, color="#94A3B8")),
+            title=dict(text="Capital Impact (PKR)", font=dict(size=11, color="#94A3B8")),
             tickprefix="PKR ",
-            tickformat=",",
+            tickformat="~s",
             gridcolor="#1F2937",
             zerolinecolor="#374151",
+            tickfont=dict(size=11, color="#CBD5E1", family="Segoe UI, Inter, sans-serif"),
         ),
         xaxis=dict(
-            tickfont=dict(size=12, color="#E2E8F0"),
+            tickfont=dict(size=11, color="#E2E8F0", family="Segoe UI, Inter, sans-serif"),
             gridcolor="#1F2937",
         ),
         font=dict(family="Segoe UI, Inter, sans-serif"),
@@ -1726,17 +1760,53 @@ def get_machine_errors(machine_id):
 # -----------------------------------------------------------------------------
 if st.session_state.nav_mode == "🏭 Graphical Factory Topology":
     st.markdown(
-        """
-    <div class="section-card">
-        <div class="section-title">
-            <span>🏭 Interactive 1 ➔ 2 ➔ 4 Factory Topology with Animated Conveyor Pipelines</span>
-            <span style="font-size: 0.8rem; font-weight: 400; color: #9CA3AF; margin-left: auto;">
-                Select any machine below to inspect its fault and observe product flow halt
-            </span>
-        </div>
-    """,
+        """<div class="section-card">
+<div class="section-title">
+<span>🏭 Interactive 1 ➔ 2 ➔ 4 Factory Topology with Animated Conveyor Pipelines</span>
+<span style="font-size: 0.8rem; font-weight: 400; color: #9CA3AF; margin-left: auto;">
+Operational flow animation reflects real-time machine trip &amp; starvation states
+</span>
+</div>""",
         unsafe_allow_html=True,
     )
+
+    # --- TOPOLOGY STATUS & OPERATIONAL RECOVERY CONTROLS ---
+    col_topo_hdr1, col_topo_hdr2 = st.columns([3.2, 1.2])
+    with col_topo_hdr1:
+        if st.session_state.active_fault_machine is None:
+            st.markdown(
+                '<div style="background: rgba(16, 185, 129, 0.12); border: 1px solid #059669; border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 10px;">'
+                '<span style="font-size: 1.2rem;">🟢</span>'
+                '<div><span style="font-weight: 700; color: #34D399; font-size: 0.92rem;">All 7 Work Centers Operating Normally (100 pkts/hr)</span>'
+                '<div style="color: #94A3B8; font-size: 0.78rem;">Click "⚡ Trigger / Inspect Fault" on any asset below to simulate failure modes and evaluate financial decision intelligence.</div></div>'
+                '</div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                f'<div style="background: rgba(239, 68, 68, 0.14); border: 1px solid #DC2626; border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 10px;">'
+                f'<span style="font-size: 1.2rem;">⛔</span>'
+                f'<div><span style="font-weight: 700; color: #F87171; font-size: 0.92rem;">Active Stoppage Simulated on {st.session_state.active_fault_machine} — Downstream Lines Starved</span>'
+                f'<div style="color: #94A3B8; font-size: 0.78rem;">Review Option A vs Option B decision below, or click Resume to restore full throughput.</div></div>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+    with col_topo_hdr2:
+        if st.button("▶️ Resume Normal Operation", key="btn_reset_all_topo", use_container_width=True):
+            st.session_state.active_fault_machine = None
+            st.session_state.last_rectified = None
+            st.rerun()
+
+    if st.session_state.last_rectified:
+        st.markdown(
+            f'<div style="background: rgba(16, 185, 129, 0.18); border: 1.5px solid #10B981; border-radius: 8px; padding: 12px 18px; margin: 12px 0; display: flex; align-items: center; justify-content: space-between;">'
+            f'<div><span style="font-weight: 700; color: #34D399; font-size: 0.98rem;">🎉 Rectification Successfully Executed: {st.session_state.last_rectified} Resumed!</span>'
+            f'<div style="color: #A7F3D0; font-size: 0.82rem; margin-top: 2px;">Option A preventative micro-stoppage performed. Net capital saved: PKR {st.session_state.last_rectified_savings:,.0f}. Conveyor pipeline flow restored to 100 pkts/hr.</div></div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
     # --- STAGE 1: HYDRAULIC PRESS (CENTER) ---
     st.markdown(
@@ -1746,8 +1816,8 @@ if st.session_state.nav_mode == "🏭 Graphical Factory Topology":
 
     m1_cols = st.columns([1.4, 3.2, 1.4])
     with m1_cols[1]:
-        m101_active = (st.session_state.selected_machine == "M-101")
-        m101_class = "topo-node topo-node-halted" if m101_active else "topo-node"
+        m101_fault = (st.session_state.active_fault_machine == "M-101")
+        m101_class = "topo-node topo-node-halted" if m101_fault else ("topo-node topo-node-active" if st.session_state.selected_machine == "M-101" else "topo-node")
         m101_meta = get_machine_meta("M-101")
         m101_img_b64 = get_image_base64(MACHINE_IMAGES.get("M-101"))
         m101_img_tag = (
@@ -1757,49 +1827,48 @@ if st.session_state.nav_mode == "🏭 Graphical Factory Topology":
         )
 
         st.markdown(
-            f"""
-        <div class="{m101_class}">
-            <div class="topo-node-title">
-                <span>M-101 · {m101_meta['Machine_Type']}</span>
-                <span class="status-pill {topo_state['M-101']['pill']}">{topo_state['M-101']['text']}</span>
-            </div>
-            {m101_img_tag}
-            <div class="topo-node-desc"><b>Rate:</b> 100 pkts/hr | <b>Loss Impact:</b> PKR 180,000/hr (100% Loss If Tripped)</div>
-            <div class="topo-node-meta">👤 Operators: {m101_meta['Operator_Assignment']}</div>
-        </div>
-        """,
+            f'<div class="{m101_class}">'
+            f'<div class="topo-node-title">'
+            f'<span>M-101 · {m101_meta["Machine_Type"]}</span>'
+            f'<span class="status-pill {topo_state["M-101"]["pill"]}">{topo_state["M-101"]["text"]}</span>'
+            f'</div>'
+            f'{m101_img_tag}'
+            f'<div class="topo-node-desc"><b>Rate:</b> {topo_state["M-101"]["rate"]} pkts/hr | <b>Loss Impact:</b> PKR 180,000/hr (100% Loss If Tripped)</div>'
+            f'<div class="topo-node-meta">👤 Operators: {m101_meta["Operator_Assignment"]}</div>'
+            f'</div>',
             unsafe_allow_html=True,
         )
-        if st.button("🔍 Inspect M-101 (Forming Press)", key="btn_m101", use_container_width=True):
-            st.session_state.selected_machine = "M-101"
-            m_errs = get_machine_errors("M-101")
-            st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
-            st.rerun()
+        if m101_fault:
+            if st.button("⛔ Active Anomaly on M-101 (Review Decision)", key="btn_m101", type="primary", use_container_width=True):
+                st.session_state.selected_machine = "M-101"
+                st.rerun()
+        else:
+            if st.button("⚡ Trigger / Inspect Fault on M-101", key="btn_m101", use_container_width=True):
+                st.session_state.active_fault_machine = "M-101"
+                st.session_state.selected_machine = "M-101"
+                m_errs = get_machine_errors("M-101")
+                st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
+                st.session_state.last_rectified = None
+                st.rerun()
 
     # --- ANIMATED CONVEYOR SPLIT 1 -> 2 (SVG) ---
     p1 = topo_state["pipes"]["m101_to_m201"]
     p2 = topo_state["pipes"]["m101_to_m202"]
+    dot_p1 = "#EF4444" if "stopped" in p1 else "#10B981"
+    dot_p2 = "#EF4444" if "stopped" in p2 else "#10B981"
 
     st.markdown(
-        f"""
-    <div style="text-align: center; margin: 4px 0 10px 0;">
-        <svg width="100%" height="70" viewBox="0 0 700 70" preserveAspectRatio="none" style="overflow: visible;">
-            <!-- Feeder stem track -->
-            <path d="M 350 0 L 350 25" class="conveyor-track" />
-            <!-- Split track left and right -->
-            <path d="M 350 25 L 175 25 L 175 70" class="conveyor-track" />
-            <path d="M 350 25 L 525 25 L 525 70" class="conveyor-track" />
-            
-            <!-- Dynamic Conveyor Flow Streams -->
-            <path d="M 350 0 L 350 25 L 175 25 L 175 70" class="{p1}" />
-            <path d="M 350 0 L 350 25 L 525 25 L 525 70" class="{p2}" />
-            
-            <!-- Flow Indicators -->
-            <circle cx="175" cy="65" r="4" fill="{'#EF4444' if 'stopped' in p1 else '#10B981'}" />
-            <circle cx="525" cy="65" r="4" fill="{'#EF4444' if 'stopped' in p2 else '#10B981'}" />
-        </svg>
-    </div>
-    """,
+        f'<div style="text-align: center; margin: 4px 0 10px 0;">'
+        f'<svg width="100%" height="70" viewBox="0 0 700 70" preserveAspectRatio="none" style="overflow: visible;">'
+        f'<path d="M 350 0 L 350 25" class="conveyor-track" />'
+        f'<path d="M 350 25 L 175 25 L 175 70" class="conveyor-track" />'
+        f'<path d="M 350 25 L 525 25 L 525 70" class="conveyor-track" />'
+        f'<path d="M 350 0 L 350 25 L 175 25 L 175 70" class="{p1}" />'
+        f'<path d="M 350 0 L 350 25 L 525 25 L 525 70" class="{p2}" />'
+        f'<circle cx="175" cy="65" r="5" fill="{dot_p1}" />'
+        f'<circle cx="525" cy="65" r="5" fill="{dot_p2}" />'
+        f'</svg>'
+        f'</div>',
         unsafe_allow_html=True,
     )
 
@@ -1812,8 +1881,9 @@ if st.session_state.nav_mode == "🏭 Graphical Factory Topology":
 
     # M-201
     with m2_cols[0]:
-        m201_active = (st.session_state.selected_machine == "M-201")
-        m201_class = "topo-node topo-node-halted" if m201_active else ("topo-node topo-node-active" if topo_state["M-201"]["status"] == "STARVED" else "topo-node")
+        m201_fault = (st.session_state.active_fault_machine == "M-201")
+        is_starved_201 = (topo_state["M-201"]["status"] == "STARVED")
+        m201_class = "topo-node topo-node-halted" if m201_fault else ("topo-node topo-node-active" if is_starved_201 else "topo-node")
         m201_meta = get_machine_meta("M-201")
         m201_img_b64 = get_image_base64(MACHINE_IMAGES.get("M-201"))
         m201_img_tag = (
@@ -1823,29 +1893,35 @@ if st.session_state.nav_mode == "🏭 Graphical Factory Topology":
         )
 
         st.markdown(
-            f"""
-        <div class="{m201_class}">
-            <div class="topo-node-title">
-                <span>M-201 · CNC Mill A</span>
-                <span class="status-pill {topo_state['M-201']['pill']}">{topo_state['M-201']['text']}</span>
-            </div>
-            {m201_img_tag}
-            <div class="topo-node-desc"><b>Rate:</b> 50 pkts/hr | <b>Loss Impact:</b> PKR 120,000/hr (Feeds Cells M-301 & M-302)</div>
-            <div class="topo-node-meta">👤 Operator: {m201_meta['Operator_Assignment']}</div>
-        </div>
-        """,
+            f'<div class="{m201_class}">'
+            f'<div class="topo-node-title">'
+            f'<span>M-201 · CNC Mill A</span>'
+            f'<span class="status-pill {topo_state["M-201"]["pill"]}">{topo_state["M-201"]["text"]}</span>'
+            f'</div>'
+            f'{m201_img_tag}'
+            f'<div class="topo-node-desc"><b>Rate:</b> {topo_state["M-201"]["rate"]} pkts/hr | <b>Loss Impact:</b> PKR 120,000/hr (Feeds Cells M-301 & M-302)</div>'
+            f'<div class="topo-node-meta">👤 Operator: {m201_meta["Operator_Assignment"]}</div>'
+            f'</div>',
             unsafe_allow_html=True,
         )
-        if st.button("🔍 Inspect M-201 (CNC Mill A)", key="btn_m201", use_container_width=True):
-            st.session_state.selected_machine = "M-201"
-            m_errs = get_machine_errors("M-201")
-            st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
-            st.rerun()
+        if m201_fault:
+            if st.button("⛔ Active Anomaly on M-201 (Review Decision)", key="btn_m201", type="primary", use_container_width=True):
+                st.session_state.selected_machine = "M-201"
+                st.rerun()
+        else:
+            if st.button("⚡ Trigger / Inspect Fault on M-201", key="btn_m201", use_container_width=True):
+                st.session_state.active_fault_machine = "M-201"
+                st.session_state.selected_machine = "M-201"
+                m_errs = get_machine_errors("M-201")
+                st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
+                st.session_state.last_rectified = None
+                st.rerun()
 
     # M-202
     with m2_cols[1]:
-        m202_active = (st.session_state.selected_machine == "M-202")
-        m202_class = "topo-node topo-node-halted" if m202_active else ("topo-node topo-node-active" if topo_state["M-202"]["status"] == "STARVED" else "topo-node")
+        m202_fault = (st.session_state.active_fault_machine == "M-202")
+        is_starved_202 = (topo_state["M-202"]["status"] == "STARVED")
+        m202_class = "topo-node topo-node-halted" if m202_fault else ("topo-node topo-node-active" if is_starved_202 else "topo-node")
         m202_meta = get_machine_meta("M-202")
         m202_img_b64 = get_image_base64(MACHINE_IMAGES.get("M-202"))
         m202_img_tag = (
@@ -1855,55 +1931,57 @@ if st.session_state.nav_mode == "🏭 Graphical Factory Topology":
         )
 
         st.markdown(
-            f"""
-        <div class="{m202_class}">
-            <div class="topo-node-title">
-                <span>M-202 · CNC Mill B</span>
-                <span class="status-pill {topo_state['M-202']['pill']}">{topo_state['M-202']['text']}</span>
-            </div>
-            {m202_img_tag}
-            <div class="topo-node-desc"><b>Rate:</b> 50 pkts/hr | <b>Loss Impact:</b> PKR 120,000/hr (Feeds Cells M-303 & M-304)</div>
-            <div class="topo-node-meta">👤 Operator: {m202_meta['Operator_Assignment']}</div>
-        </div>
-        """,
+            f'<div class="{m202_class}">'
+            f'<div class="topo-node-title">'
+            f'<span>M-202 · CNC Mill B</span>'
+            f'<span class="status-pill {topo_state["M-202"]["pill"]}">{topo_state["M-202"]["text"]}</span>'
+            f'</div>'
+            f'{m202_img_tag}'
+            f'<div class="topo-node-desc"><b>Rate:</b> {topo_state["M-202"]["rate"]} pkts/hr | <b>Loss Impact:</b> PKR 120,000/hr (Feeds Cells M-303 & M-304)</div>'
+            f'<div class="topo-node-meta">👤 Operator: {m202_meta["Operator_Assignment"]}</div>'
+            f'</div>',
             unsafe_allow_html=True,
         )
-        if st.button("🔍 Inspect M-202 (CNC Mill B)", key="btn_m202", use_container_width=True):
-            st.session_state.selected_machine = "M-202"
-            m_errs = get_machine_errors("M-202")
-            st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
-            st.rerun()
+        if m202_fault:
+            if st.button("⛔ Active Anomaly on M-202 (Review Decision)", key="btn_m202", type="primary", use_container_width=True):
+                st.session_state.selected_machine = "M-202"
+                st.rerun()
+        else:
+            if st.button("⚡ Trigger / Inspect Fault on M-202", key="btn_m202", use_container_width=True):
+                st.session_state.active_fault_machine = "M-202"
+                st.session_state.selected_machine = "M-202"
+                m_errs = get_machine_errors("M-202")
+                st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
+                st.session_state.last_rectified = None
+                st.rerun()
 
     # --- ANIMATED CONVEYOR SPLIT 2 -> 4 (SVG) ---
     p201_301 = topo_state["pipes"]["m201_to_m301"]
     p201_302 = topo_state["pipes"]["m201_to_m302"]
     p202_303 = topo_state["pipes"]["m202_to_m303"]
     p202_304 = topo_state["pipes"]["m202_to_m304"]
+    dot_301 = "#EF4444" if "stopped" in p201_301 else "#10B981"
+    dot_302 = "#EF4444" if "stopped" in p201_302 else "#10B981"
+    dot_303 = "#EF4444" if "stopped" in p202_303 else "#10B981"
+    dot_304 = "#EF4444" if "stopped" in p202_304 else "#10B981"
 
     st.markdown(
-        f"""
-    <div style="text-align: center; margin: 4px 0 10px 0;">
-        <svg width="100%" height="70" viewBox="0 0 800 70" preserveAspectRatio="none" style="overflow: visible;">
-            <!-- Left Mill A Split (feeds 301, 302) -->
-            <path d="M 200 0 L 200 25 L 100 25 L 100 70" class="conveyor-track" />
-            <path d="M 200 25 L 300 25 L 300 70" class="conveyor-track" />
-            <path d="M 200 0 L 200 25 L 100 25 L 100 70" class="{p201_301}" />
-            <path d="M 200 25 L 300 25 L 300 70" class="{p201_302}" />
-            
-            <!-- Right Mill B Split (feeds 303, 304) -->
-            <path d="M 600 0 L 600 25 L 500 25 L 500 70" class="conveyor-track" />
-            <path d="M 600 25 L 700 25 L 700 70" class="conveyor-track" />
-            <path d="M 600 0 L 600 25 L 500 25 L 500 70" class="{p202_303}" />
-            <path d="M 600 25 L 700 25 L 700 70" class="{p202_304}" />
-            
-            <!-- Terminus Flow Dots -->
-            <circle cx="100" cy="65" r="4" fill="{'#EF4444' if 'stopped' in p201_301 else '#10B981'}" />
-            <circle cx="300" cy="65" r="4" fill="{'#EF4444' if 'stopped' in p201_302 else '#10B981'}" />
-            <circle cx="500" cy="65" r="4" fill="{'#EF4444' if 'stopped' in p202_303 else '#10B981'}" />
-            <circle cx="700" cy="65" r="4" fill="{'#EF4444' if 'stopped' in p202_304 else '#10B981'}" />
-        </svg>
-    </div>
-    """,
+        f'<div style="text-align: center; margin: 4px 0 10px 0;">'
+        f'<svg width="100%" height="70" viewBox="0 0 800 70" preserveAspectRatio="none" style="overflow: visible;">'
+        f'<path d="M 200 0 L 200 25 L 100 25 L 100 70" class="conveyor-track" />'
+        f'<path d="M 200 25 L 300 25 L 300 70" class="conveyor-track" />'
+        f'<path d="M 200 0 L 200 25 L 100 25 L 100 70" class="{p201_301}" />'
+        f'<path d="M 200 25 L 300 25 L 300 70" class="{p201_302}" />'
+        f'<path d="M 600 0 L 600 25 L 500 25 L 500 70" class="conveyor-track" />'
+        f'<path d="M 600 25 L 700 25 L 700 70" class="conveyor-track" />'
+        f'<path d="M 600 0 L 600 25 L 500 25 L 500 70" class="{p202_303}" />'
+        f'<path d="M 600 25 L 700 25 L 700 70" class="{p202_304}" />'
+        f'<circle cx="100" cy="65" r="5" fill="{dot_301}" />'
+        f'<circle cx="300" cy="65" r="5" fill="{dot_302}" />'
+        f'<circle cx="500" cy="65" r="5" fill="{dot_303}" />'
+        f'<circle cx="700" cy="65" r="5" fill="{dot_304}" />'
+        f'</svg>'
+        f'</div>',
         unsafe_allow_html=True,
     )
 
@@ -1917,8 +1995,9 @@ if st.session_state.nav_mode == "🏭 Graphical Factory Topology":
     pkg_machines = ["M-301", "M-302", "M-303", "M-304"]
     for i, m_id in enumerate(pkg_machines):
         with m3_cols[i]:
-            m_active = (st.session_state.selected_machine == m_id)
-            m_class = "topo-node topo-node-halted" if m_active else ("topo-node topo-node-active" if topo_state[m_id]["status"] == "STARVED" else "topo-node")
+            m_fault = (st.session_state.active_fault_machine == m_id)
+            is_starved_pkg = (topo_state[m_id]["status"] == "STARVED")
+            m_class = "topo-node topo-node-halted" if m_fault else ("topo-node topo-node-active" if is_starved_pkg else "topo-node")
             m_meta = get_machine_meta(m_id)
             pkg_img_b64 = get_image_base64(MACHINE_IMAGES.get(m_id))
             pkg_img_tag = (
@@ -1928,24 +2007,29 @@ if st.session_state.nav_mode == "🏭 Graphical Factory Topology":
             )
 
             st.markdown(
-                f"""
-            <div class="{m_class}">
-                <div class="topo-node-title">
-                    <span style="font-size: 0.95rem;">{m_id}</span>
-                    <span class="status-pill {topo_state[m_id]['pill']}">{topo_state[m_id]['text']}</span>
-                </div>
-                {pkg_img_tag}
-                <div class="topo-node-desc" style="font-size: 0.76rem;"><b>Cap:</b> 25 pkts/hr | <b>Loss:</b> PKR 45k/hr</div>
-                <div class="topo-node-meta" style="font-size: 0.72rem;">👤 {m_meta['Operator_Assignment'].split(';')[0]}</div>
-            </div>
-            """,
+                f'<div class="{m_class}">'
+                f'<div class="topo-node-title">'
+                f'<span style="font-size: 0.95rem;">{m_id}</span>'
+                f'<span class="status-pill {topo_state[m_id]["pill"]}">{topo_state[m_id]["text"]}</span>'
+                f'</div>'
+                f'{pkg_img_tag}'
+                f'<div class="topo-node-desc" style="font-size: 0.76rem;"><b>Cap:</b> {topo_state[m_id]["rate"]} pkts/hr | <b>Loss:</b> PKR 45k/hr</div>'
+                f'<div class="topo-node-meta" style="font-size: 0.72rem;">👤 {m_meta["Operator_Assignment"].split(";")[0]}</div>'
+                f'</div>',
                 unsafe_allow_html=True,
             )
-            if st.button(f"🔍 Inspect {m_id}", key=f"btn_{m_id}", use_container_width=True):
-                st.session_state.selected_machine = m_id
-                m_errs = get_machine_errors(m_id)
-                st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
-                st.rerun()
+            if m_fault:
+                if st.button(f"⛔ Active on {m_id}", key=f"btn_{m_id}", type="primary", use_container_width=True):
+                    st.session_state.selected_machine = m_id
+                    st.rerun()
+            else:
+                if st.button(f"⚡ Inspect {m_id}", key=f"btn_{m_id}", use_container_width=True):
+                    st.session_state.active_fault_machine = m_id
+                    st.session_state.selected_machine = m_id
+                    m_errs = get_machine_errors(m_id)
+                    st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
+                    st.session_state.last_rectified = None
+                    st.rerun()
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -2314,7 +2398,10 @@ if is_safety:
         }
         st.session_state.history_log.insert(0, new_event)
         st.session_state.kpi_totals["safety_overrides"] += 1
-        st.toast("🛑 Statutory safety lockout executed and recorded into shift handover log.", icon="🛑")
+        st.session_state.active_fault_machine = None
+        st.session_state.last_rectified = curr_machine_id
+        st.session_state.last_rectified_savings = 0.0
+        st.toast(f"🛑 Statutory safety lockout executed for {curr_machine_id}. Safe isolation logged.", icon="🛑")
         st.rerun()
 
 else:
@@ -2360,7 +2447,11 @@ else:
             st.session_state.monthly_summary["2026-09"]["net"] += net_val
             st.session_state.monthly_summary["2026-09"]["hours"] += rescued_hrs
 
-            st.toast(f"Intervention logged: PKR {net_val:,.0f} preserved!", icon="✅")
+            # RESUME FULL PLANT OPERATIONS
+            st.session_state.active_fault_machine = None
+            st.session_state.last_rectified = curr_machine_id
+            st.session_state.last_rectified_savings = net_val
+            st.toast(f"✅ Option A Executed: {curr_machine_id} repaired! Normal factory flow resumed at 100 pkts/hr. PKR {net_val:,.0f} preserved!", icon="🎉")
             st.rerun()
 
     with action_col2:
@@ -2395,6 +2486,8 @@ else:
                         "Notes": f"DEFERRED BY OPERATOR. Justification: {defer_reason.strip()}",
                     }
                     st.session_state.history_log.insert(0, new_event)
+                    st.session_state.active_fault_machine = None
+                    st.session_state.last_rectified = None
                     st.warning(f"⚠️ Deferral registered. Active exposure of PKR {opt_b_total:,.0f} logged to shift handover.")
                     st.rerun()
 
