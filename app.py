@@ -10,9 +10,10 @@ import plotly.graph_objects as go
 from datetime import datetime
 import json
 import os
+import base64
 
 # -----------------------------------------------------------------------------
-# 1. PAGE CONFIGURATION & INLINE INDUSTRIAL DARK CSS
+# 1. PAGE CONFIGURATION & INLINE HIGH-TECH INDUSTRIAL DARK CSS
 # -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="Maintenance Decision Intelligence",
@@ -21,104 +22,165 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# Custom CSS for Industrial Dark Theme
+MACHINE_IMAGES = {
+    "M-101": "assets/hydraulic_press.jpg",
+    "M-201": "assets/cnc_mill.jpg",
+    "M-202": "assets/cnc_mill.jpg",
+    "M-301": "assets/packaging_cell.jpg",
+    "M-302": "assets/packaging_cell.jpg",
+    "M-303": "assets/packaging_cell.jpg",
+    "M-304": "assets/packaging_cell.jpg",
+}
+
+@st.cache_data
+def get_image_base64(filepath):
+    """Safely load and base64-encode image for inline zero-failure rendering."""
+    if filepath and os.path.exists(filepath):
+        try:
+            with open(filepath, "rb") as f:
+                return base64.b64encode(f.read()).decode("utf-8")
+        except Exception:
+            return None
+    return None
+
+# Custom CSS for Modern Industrial Dark Theme
 st.markdown(
     """
 <style>
-    /* Dark Industrial Theme Palette */
+    /* High-Tech Industrial Color Scheme */
     :root {
-        --bg-main: #0E1117;
-        --bg-card: #161B22;
-        --bg-card-alt: #1E2433;
-        --border-subtle: #30363D;
-        --accent-blue: #1976D2;
-        --accent-blue-light: #42A5F5;
-        --emerald: #2E7D32;
-        --emerald-bright: #4CAF50;
-        --emerald-bg: rgba(46, 125, 50, 0.12);
-        --crimson: #C62828;
-        --crimson-bright: #EF5350;
-        --crimson-bg: rgba(198, 40, 40, 0.12);
-        --amber: #F57C00;
-        --amber-bg: rgba(245, 124, 0, 0.12);
-        --text-white: #F0F6FC;
-        --text-muted: #8B949E;
-        --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        --bg-main: #0B0F19;
+        --bg-card: #111827;
+        --bg-card-alt: #1F2937;
+        --border-subtle: #374151;
+        --accent-blue: #2563EB;
+        --accent-cyan: #06B6D4;
+        --accent-cyan-light: #38BDF8;
+        --emerald: #059669;
+        --emerald-bright: #10B981;
+        --emerald-bg: rgba(16, 185, 129, 0.12);
+        --crimson: #DC2626;
+        --crimson-bright: #EF4444;
+        --crimson-bg: rgba(239, 68, 68, 0.14);
+        --amber: #D97706;
+        --amber-bright: #F59E0B;
+        --amber-bg: rgba(245, 158, 11, 0.14);
+        --text-white: #F9FAFB;
+        --text-muted: #9CA3AF;
+        --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, Menlo, Courier, monospace;
     }
 
-    /* Overall page background */
+    /* Overall page styling */
     .stApp {
         background-color: var(--bg-main);
         color: var(--text-white);
+        font-family: var(--font-sans);
     }
 
-    /* Title & Banner Styling */
-    .main-header {
-        background: linear-gradient(135deg, #131720 0%, #1A2234 100%);
-        border: 1px solid #30363D;
-        border-left: 6px solid var(--accent-blue);
-        border-radius: 8px;
-        padding: 22px 28px;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    /* Tight, High-Density Executive Header Banner */
+    .main-header-grid {
+        background: linear-gradient(135deg, #111827 0%, #172033 60%, #1E293B 100%);
+        border: 1px solid #374151;
+        border-left: 6px solid #38BDF8;
+        border-radius: 10px;
+        padding: 18px 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        display: grid;
+        grid-template-columns: 1.8fr 1.2fr;
+        gap: 20px;
+        align-items: center;
     }
-    .main-title {
-        font-size: 2.1rem;
-        font-weight: 700;
-        color: #FFFFFF;
+    @media (max-width: 900px) {
+        .main-header-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .header-title-box h1 {
+        font-size: 1.95rem;
+        font-weight: 800;
+        color: #F9FAFB;
         margin: 0;
         letter-spacing: -0.5px;
     }
-    .main-subtitle {
-        font-size: 1.05rem;
-        color: var(--text-muted);
-        margin-top: 6px;
-        font-weight: 400;
+    .header-subtitle {
+        font-size: 0.95rem;
+        color: #9CA3AF;
+        margin-top: 4px;
+        margin-bottom: 10px;
     }
-    .thesis-tag {
-        display: inline-block;
-        background: rgba(25, 118, 210, 0.2);
-        border: 1px solid var(--accent-blue);
-        color: var(--accent-blue-light);
-        font-size: 0.85rem;
+    .thesis-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(56, 189, 248, 0.12);
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        color: #38BDF8;
+        font-size: 0.82rem;
         font-weight: 600;
         padding: 4px 12px;
         border-radius: 20px;
-        margin-top: 10px;
         font-family: var(--font-mono);
     }
 
-    /* Top KPI Metric Cards */
+    /* Right-side Live Plant HUD */
+    .header-hud-box {
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 12px 18px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    .hud-stat-item {
+        display: flex;
+        flex-direction: column;
+    }
+    .hud-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: #94A3B8;
+        font-weight: 600;
+    }
+    .hud-value {
+        font-size: 1.15rem;
+        font-weight: 700;
+        font-family: var(--font-mono);
+        margin-top: 2px;
+    }
+
+    /* Top KPI Cards */
     .kpi-container {
         background: var(--bg-card);
         border: 1px solid var(--border-subtle);
         border-radius: 8px;
         padding: 16px 20px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
         transition: transform 0.2s ease, border-color 0.2s ease;
     }
     .kpi-container:hover {
-        border-color: var(--accent-blue);
+        border-color: #38BDF8;
         transform: translateY(-2px);
     }
     .kpi-label {
-        font-size: 0.82rem;
-        color: var(--text-muted);
+        font-size: 0.78rem;
+        color: #9CA3AF;
         text-transform: uppercase;
         letter-spacing: 0.8px;
         font-weight: 600;
         margin-bottom: 6px;
     }
     .kpi-value {
-        font-size: 1.85rem;
-        font-weight: 700;
+        font-size: 1.8rem;
+        font-weight: 800;
         font-family: var(--font-mono);
-        color: #FFFFFF;
         line-height: 1.2;
     }
     .kpi-subtext {
         font-size: 0.8rem;
-        color: var(--emerald-bright);
         font-weight: 500;
         margin-top: 4px;
     }
@@ -127,15 +189,15 @@ st.markdown(
     .section-card {
         background: var(--bg-card);
         border: 1px solid var(--border-subtle);
-        border-radius: 8px;
+        border-radius: 10px;
         padding: 20px;
         margin-bottom: 24px;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     }
     .section-title {
-        font-size: 1.25rem;
+        font-size: 1.22rem;
         font-weight: 700;
-        color: #FFFFFF;
+        color: #F9FAFB;
         margin-bottom: 16px;
         display: flex;
         align-items: center;
@@ -144,13 +206,13 @@ st.markdown(
         padding-bottom: 10px;
     }
 
-    /* Factory Topology Visual Nodes */
+    /* Machine Card Visuals */
     .topo-stage-header {
-        font-size: 0.88rem;
+        font-size: 0.84rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 1px;
-        color: var(--accent-blue-light);
+        color: #38BDF8;
         margin-bottom: 10px;
         text-align: center;
     }
@@ -158,18 +220,23 @@ st.markdown(
         background: var(--bg-card-alt);
         border: 1px solid var(--border-subtle);
         border-radius: 8px;
-        padding: 14px;
+        padding: 12px 14px;
         text-align: left;
         transition: all 0.25s ease;
         position: relative;
     }
     .topo-node-active {
-        border: 2px solid var(--accent-blue-light) !important;
-        box-shadow: 0 0 16px rgba(66, 165, 245, 0.35);
-        background: #1C273C !important;
+        border: 2px solid #38BDF8 !important;
+        box-shadow: 0 0 18px rgba(56, 189, 248, 0.4);
+        background: #19253B !important;
+    }
+    .topo-node-halted {
+        border: 2px solid #EF4444 !important;
+        box-shadow: 0 0 18px rgba(239, 68, 68, 0.45);
+        background: #2A171A !important;
     }
     .topo-node-title {
-        font-size: 1.05rem;
+        font-size: 1rem;
         font-weight: 700;
         color: #FFFFFF;
         display: flex;
@@ -177,91 +244,141 @@ st.markdown(
         align-items: center;
     }
     .topo-node-desc {
-        font-size: 0.82rem;
-        color: var(--text-muted);
+        font-size: 0.8rem;
+        color: #9CA3AF;
         margin-top: 4px;
     }
     .topo-node-meta {
-        font-size: 0.78rem;
-        color: #A0AEC0;
-        margin-top: 8px;
+        font-size: 0.76rem;
+        color: #CBD5E1;
+        margin-top: 6px;
         font-family: var(--font-mono);
     }
+
+    /* Machine Picture Styling */
+    .machine-img-box {
+        width: 100%;
+        overflow: hidden;
+        border-radius: 6px;
+        margin: 8px 0;
+        border: 1px solid #374151;
+        background: #0B0E14;
+    }
+    .machine-img {
+        width: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.3s ease;
+    }
+    .machine-img:hover {
+        transform: scale(1.04);
+    }
+
+    /* Status Pills */
     .status-pill {
         display: inline-block;
-        padding: 3px 9px;
+        padding: 3px 8px;
         border-radius: 12px;
         font-size: 0.72rem;
-        font-weight: 600;
+        font-weight: 700;
         letter-spacing: 0.3px;
+        font-family: var(--font-mono);
     }
     .status-pill-green {
         background: var(--emerald-bg);
-        color: var(--emerald-bright);
-        border: 1px solid var(--emerald);
+        color: #34D399;
+        border: 1px solid #059669;
     }
     .status-pill-amber {
         background: var(--amber-bg);
-        color: #FFB74D;
-        border: 1px solid var(--amber);
+        color: #FBBF24;
+        border: 1px solid #D97706;
     }
     .status-pill-red {
         background: var(--crimson-bg);
-        color: var(--crimson-bright);
-        border: 1px solid var(--crimson);
+        color: #F87171;
+        border: 1px solid #DC2626;
     }
 
-    /* Pipeline Connector Flow Arrow */
-    .pipe-connector {
-        text-align: center;
-        color: #4A5568;
-        font-size: 1.4rem;
-        font-weight: 900;
-        margin: 6px 0;
-        line-height: 1;
+    /* Pipeline Conveyor Product Movement Animations */
+    @keyframes conveyor-dash {
+        0% { stroke-dashoffset: 48; }
+        100% { stroke-dashoffset: 0; }
+    }
+    .conveyor-track {
+        stroke: #334155;
+        stroke-width: 5;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+    .flow-line-moving {
+        stroke: #10B981;
+        stroke-width: 3.5;
+        stroke-dasharray: 12, 8;
+        fill: none;
+        animation: conveyor-dash 1.1s linear infinite;
+        filter: drop-shadow(0 0 5px rgba(16, 185, 129, 0.75));
+    }
+    .flow-line-stopped {
+        stroke: #EF4444;
+        stroke-width: 3.5;
+        stroke-dasharray: 6, 6;
+        fill: none;
+        animation: none !important;
+        filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.8));
+        opacity: 0.9;
+    }
+    .flow-line-starved {
+        stroke: #F59E0B;
+        stroke-width: 2.5;
+        stroke-dasharray: 4, 6;
+        fill: none;
+        animation: none !important;
+        opacity: 0.5;
     }
 
     /* Decision Gatekeeper Side-by-Side Cards */
     .option-card {
         border-radius: 8px;
-        padding: 22px;
+        padding: 20px;
         height: 100%;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     }
     .option-a-card {
-        background: #111B15;
-        border: 1.5px solid var(--emerald);
+        background: #0D1A14;
+        border: 1.5px solid #059669;
     }
     .option-b-card {
-        background: #1F1315;
-        border: 1.5px solid var(--crimson);
+        background: #211215;
+        border: 1.5px solid #DC2626;
     }
     .option-b-locked {
-        background: #16181C !important;
-        border: 1.5px dashed #4A5568 !important;
+        background: #14171F !important;
+        border: 1.5px dashed #4B5563 !important;
         opacity: 0.45;
         filter: grayscale(80%);
     }
     .option-header {
-        font-size: 1.25rem;
+        font-size: 1.22rem;
         font-weight: 700;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding-bottom: 10px;
+        padding-bottom: 8px;
     }
     .cost-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 8px 0;
+        padding: 7px 0;
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        font-size: 0.92rem;
+        font-size: 0.9rem;
     }
     .cost-label {
-        color: #CBD5E0;
+        color: #D1D5DB;
     }
     .cost-value {
         font-family: var(--font-mono);
@@ -269,27 +386,27 @@ st.markdown(
         color: #FFFFFF;
     }
     .total-cost-box {
-        margin-top: 18px;
-        padding: 14px;
+        margin-top: 16px;
+        padding: 12px;
         border-radius: 6px;
         text-align: right;
     }
     .total-cost-box-a {
-        background: rgba(46, 125, 50, 0.25);
-        border: 1px solid var(--emerald-bright);
+        background: rgba(16, 185, 129, 0.2);
+        border: 1px solid #10B981;
     }
     .total-cost-box-b {
-        background: rgba(198, 40, 40, 0.25);
-        border: 1px solid var(--crimson-bright);
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid #EF4444;
     }
     .total-cost-label {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         text-transform: uppercase;
         letter-spacing: 0.8px;
         font-weight: 600;
     }
     .total-cost-value {
-        font-size: 2.1rem;
+        font-size: 2rem;
         font-weight: 800;
         font-family: var(--font-mono);
         line-height: 1.2;
@@ -297,39 +414,39 @@ st.markdown(
 
     /* Net Decision Banner */
     .net-decision-banner {
-        background: linear-gradient(90deg, #102A1C 0%, #153A26 100%);
-        border: 2px solid var(--emerald-bright);
+        background: linear-gradient(90deg, #092618 0%, #0F3A24 100%);
+        border: 2px solid #10B981;
         border-radius: 8px;
-        padding: 20px 26px;
-        margin: 20px 0;
+        padding: 18px 24px;
+        margin: 18px 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 4px 20px rgba(46, 125, 50, 0.35);
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);
     }
     .net-banner-title {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
         font-weight: 700;
         color: #FFFFFF;
     }
     .net-banner-sub {
-        font-size: 0.9rem;
+        font-size: 0.88rem;
         color: #A7F3D0;
         margin-top: 4px;
     }
     .net-banner-metrics {
         display: flex;
-        gap: 32px;
+        gap: 28px;
         text-align: right;
     }
     .net-metric-num {
-        font-size: 2.1rem;
+        font-size: 1.95rem;
         font-weight: 800;
         font-family: var(--font-mono);
         color: #6EE7B7;
     }
     .net-metric-lbl {
-        font-size: 0.8rem;
+        font-size: 0.78rem;
         text-transform: uppercase;
         letter-spacing: 0.8px;
         color: #D1FAE5;
@@ -337,37 +454,41 @@ st.markdown(
 
     /* Statutory Safety Alert Banner */
     .safety-alert-banner {
-        background: linear-gradient(90deg, #380C11 0%, #521219 100%);
-        border: 2px solid var(--crimson-bright);
+        background: linear-gradient(90deg, #380C11 0%, #4D1016 100%);
+        border: 2px solid #EF4444;
         border-radius: 8px;
-        padding: 22px 28px;
-        margin: 20px 0;
-        box-shadow: 0 4px 24px rgba(239, 83, 80, 0.4);
+        padding: 20px 24px;
+        margin: 18px 0;
+        box-shadow: 0 4px 24px rgba(239, 68, 68, 0.4);
     }
     .safety-alert-title {
-        font-size: 1.35rem;
+        font-size: 1.25rem;
         font-weight: 800;
-        color: #FFA4A2;
+        color: #FCA5A5;
         letter-spacing: 0.5px;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
     }
     .safety-alert-body {
-        font-size: 0.96rem;
-        color: #FFCDD2;
-        margin-top: 10px;
+        font-size: 0.92rem;
+        color: #FEE2E2;
+        margin-top: 8px;
         line-height: 1.5;
     }
 
     /* Diagnostic Callout Header */
     .diagnostic-header {
-        background: #1A202C;
-        border: 1px solid var(--border-subtle);
-        border-left: 4px solid var(--accent-blue);
-        border-radius: 6px;
-        padding: 14px 20px;
+        background: #162032;
+        border: 1px solid #374151;
+        border-left: 5px solid #38BDF8;
+        border-radius: 8px;
+        padding: 16px 20px;
         margin-bottom: 18px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 20px;
+        align-items: center;
     }
     .diag-title {
         font-size: 1.15rem;
@@ -375,9 +496,9 @@ st.markdown(
         color: #FFFFFF;
     }
     .diag-meta {
-        font-size: 0.88rem;
-        color: var(--text-muted);
-        margin-top: 4px;
+        font-size: 0.85rem;
+        color: #9CA3AF;
+        margin-top: 6px;
     }
 
     /* Button Customization */
@@ -1240,7 +1361,6 @@ def load_master_data():
     if history_df is None or history_df.empty:
         history_df = pd.DataFrame(FALLBACK_HISTORICAL_EVENTS)
 
-    # Clean and cast columns explicitly to numeric
     numeric_cols_errors = [
         "Line_Loss_Rate_PKR_hr",
         "Planned_Downtime_min",
@@ -1279,7 +1399,6 @@ if "nav_mode" not in st.session_state:
     st.session_state.nav_mode = "🏭 Graphical Factory Topology"
 
 if "history_log" not in st.session_state:
-    # Seed historical records
     initial_records = history_df.to_dict(orient="records")
     st.session_state.history_log = initial_records
 
@@ -1302,21 +1421,116 @@ if "defer_remark" not in st.session_state:
     st.session_state.defer_remark = ""
 
 # -----------------------------------------------------------------------------
-# 4. TOP TITLE BANNER & EXECUTIVE SUMMARY
+# 4. DYNAMIC TOPOLOGY STATE & FLOW CALCULATOR
 # -----------------------------------------------------------------------------
-st.markdown(
+def get_topology_flow_state(selected_m):
     """
-<div class="main-header">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
-        <div>
-            <h1 class="main-title">Factory Downtime & Maintenance Decision Intelligence</h1>
-            <p class="main-subtitle">Translating Technical Machine Risk into Boardroom & Executive Economics</p>
-            <div class="thesis-tag">💡 Core Operational Thesis: "Stop for 10 minutes now or lose 2 hours later?"</div>
+    Computes exact throughputs and pipeline states across the 1 -> 2 -> 4 tree.
+    When a machine is inspected/selected, that line halts (0 pkts/hr), and
+    downstream starve conditions propagate.
+    """
+    state = {
+        "M-101": {"status": "RUNNING", "rate": 100, "pill": "status-pill-green", "text": "● 100 pkts/hr"},
+        "M-201": {"status": "RUNNING", "rate": 50, "pill": "status-pill-green", "text": "● 50 pkts/hr"},
+        "M-202": {"status": "RUNNING", "rate": 50, "pill": "status-pill-green", "text": "● 50 pkts/hr"},
+        "M-301": {"status": "RUNNING", "rate": 25, "pill": "status-pill-green", "text": "● 25 pkts/hr"},
+        "M-302": {"status": "RUNNING", "rate": 25, "pill": "status-pill-green", "text": "● 25 pkts/hr"},
+        "M-303": {"status": "RUNNING", "rate": 25, "pill": "status-pill-green", "text": "● 25 pkts/hr"},
+        "M-304": {"status": "RUNNING", "rate": 25, "pill": "status-pill-green", "text": "● 25 pkts/hr"},
+        "pipes": {
+            "m101_to_m201": "flow-line-moving",
+            "m101_to_m202": "flow-line-moving",
+            "m201_to_m301": "flow-line-moving",
+            "m201_to_m302": "flow-line-moving",
+            "m202_to_m303": "flow-line-moving",
+            "m202_to_m304": "flow-line-moving",
+        },
+        "total_output": 100,
+        "loss_pct": 0,
+    }
+
+    if selected_m == "M-101":
+        state["M-101"] = {"status": "HALTED", "rate": 0, "pill": "status-pill-red", "text": "⛔ HALTED (0 pkts/hr)"}
+        for m in ["M-201", "M-202"]:
+            state[m] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
+        for m in ["M-301", "M-302", "M-303", "M-304"]:
+            state[m] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
+        for p in state["pipes"]:
+            state["pipes"][p] = "flow-line-stopped"
+        state["total_output"] = 0
+        state["loss_pct"] = 100
+
+    elif selected_m == "M-201":
+        state["M-201"] = {"status": "HALTED", "rate": 0, "pill": "status-pill-red", "text": "⛔ HALTED (0 pkts/hr)"}
+        state["M-301"] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
+        state["M-302"] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
+        state["pipes"]["m101_to_m201"] = "flow-line-stopped"
+        state["pipes"]["m201_to_m301"] = "flow-line-stopped"
+        state["pipes"]["m201_to_m302"] = "flow-line-stopped"
+        state["total_output"] = 50
+        state["loss_pct"] = 50
+
+    elif selected_m == "M-202":
+        state["M-202"] = {"status": "HALTED", "rate": 0, "pill": "status-pill-red", "text": "⛔ HALTED (0 pkts/hr)"}
+        state["M-303"] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
+        state["M-304"] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
+        state["pipes"]["m101_to_m202"] = "flow-line-stopped"
+        state["pipes"]["m202_to_m303"] = "flow-line-stopped"
+        state["pipes"]["m202_to_m304"] = "flow-line-stopped"
+        state["total_output"] = 50
+        state["loss_pct"] = 50
+
+    elif selected_m in ["M-301", "M-302", "M-303", "M-304"]:
+        state[selected_m] = {"status": "HALTED", "rate": 0, "pill": "status-pill-red", "text": "⛔ HALTED (0 pkts/hr)"}
+        if selected_m == "M-301":
+            state["pipes"]["m201_to_m301"] = "flow-line-stopped"
+        elif selected_m == "M-302":
+            state["pipes"]["m201_to_m302"] = "flow-line-stopped"
+        elif selected_m == "M-303":
+            state["pipes"]["m202_to_m303"] = "flow-line-stopped"
+        elif selected_m == "M-304":
+            state["pipes"]["m202_to_m304"] = "flow-line-stopped"
+        state["total_output"] = 75
+        state["loss_pct"] = 25
+
+    return state
+
+topo_state = get_topology_flow_state(st.session_state.selected_machine)
+
+# -----------------------------------------------------------------------------
+# 5. HIGH-DENSITY TITLE BANNER & EXECUTIVE HUD
+# -----------------------------------------------------------------------------
+output_color = "#10B981" if topo_state["total_output"] == 100 else ("#F59E0B" if topo_state["total_output"] >= 50 else "#EF4444")
+
+st.markdown(
+    f"""
+<div class="main-header-grid">
+    <div class="header-title-box">
+        <h1>Factory Downtime & Maintenance Decision Intelligence</h1>
+        <div class="header-subtitle">Translating Technical Machine Risk into Boardroom & Executive Economics</div>
+        <div class="thesis-badge">
+            <span>💡</span>
+            <span>Core Thesis: "Stop for 10 minutes now or lose 2 hours later?"</span>
         </div>
-        <div style="text-align: right;">
-            <div style="font-size: 0.8rem; color: #8B949E; font-family: var(--font-mono); text-transform: uppercase;">Plant Operating Status</div>
-            <div style="font-size: 1.1rem; color: #4CAF50; font-weight: 700; margin-top: 3px;">● 100 pkts/hr Balanced Topology</div>
-            <div style="font-size: 0.82rem; color: #A0AEC0; margin-top: 4px;">Audit Window: July 2026 – September 2026 (Live)</div>
+    </div>
+    <div class="header-hud-box">
+        <div class="hud-stat-item">
+            <span class="hud-label">Plant Flow Status</span>
+            <span class="hud-value" style="color: {output_color};">
+                {topo_state['total_output']} pkts/hr <span style="font-size: 0.8rem; font-weight: 500;">(-{topo_state['loss_pct']}%)</span>
+            </span>
+        </div>
+        <div class="hud-stat-item">
+            <span class="hud-label">Active Focus Node</span>
+            <span class="hud-value" style="color: #38BDF8;">{st.session_state.selected_machine}</span>
+        </div>
+        <div class="hud-stat-item">
+            <span class="hud-label">Operating Topology</span>
+            <span class="hud-value" style="color: #CBD5E1; font-size: 0.95rem;">1 ➔ 2 ➔ 4 Diverging</span>
+        </div>
+        <div class="hud-stat-item">
+            <span class="hud-label">Audit Window</span>
+            <span class="hud-value" style="color: #A7F3D0; font-size: 0.95rem;">Jul – Sep 2026 MTD</span>
         </div>
     </div>
 </div>
@@ -1325,7 +1539,7 @@ st.markdown(
 )
 
 # -----------------------------------------------------------------------------
-# 5. STRATEGIC SAVINGS DASHBOARD (JULY 2026 - MTD)
+# 6. STRATEGIC SAVINGS DASHBOARD (TOP KPIS)
 # -----------------------------------------------------------------------------
 col_kpi1, col_kpi2, col_kpi3, col_kpi4 = st.columns(4)
 
@@ -1334,8 +1548,8 @@ with col_kpi1:
         f"""
     <div class="kpi-container">
         <div class="kpi-label">Net Capital Losses Avoided</div>
-        <div class="kpi-value" style="color: #4CAF50;">PKR {st.session_state.kpi_totals['net_loss_avoided']:,.0f}</div>
-        <div class="kpi-subtext">▲ Direct unbudgeted loss mitigated</div>
+        <div class="kpi-value" style="color: #10B981;">PKR {st.session_state.kpi_totals['net_loss_avoided']:,.0f}</div>
+        <div class="kpi-subtext" style="color: #34D399;">▲ Direct unbudgeted loss mitigated</div>
     </div>
     """,
         unsafe_allow_html=True,
@@ -1346,8 +1560,8 @@ with col_kpi2:
         f"""
     <div class="kpi-container">
         <div class="kpi-label">Production Hours Rescued</div>
-        <div class="kpi-value" style="color: #42A5F5;">{st.session_state.kpi_totals['hours_rescued']:.1f} hrs</div>
-        <div class="kpi-subtext">▲ Across 7 active work centers</div>
+        <div class="kpi-value" style="color: #38BDF8;">{st.session_state.kpi_totals['hours_rescued']:.1f} hrs</div>
+        <div class="kpi-subtext" style="color: #7DD3FC;">▲ Across 7 factory work centers</div>
     </div>
     """,
         unsafe_allow_html=True,
@@ -1358,8 +1572,8 @@ with col_kpi3:
         f"""
     <div class="kpi-container">
         <div class="kpi-label">Preventative Stops Approved</div>
-        <div class="kpi-value" style="color: #FFB74D;">{st.session_state.kpi_totals['stops_approved']} Actions</div>
-        <div class="kpi-subtext">▲ Scheduled micro-stoppages</div>
+        <div class="kpi-value" style="color: #F59E0B;">{st.session_state.kpi_totals['stops_approved']} Actions</div>
+        <div class="kpi-subtext" style="color: #FBBF24;">▲ Scheduled micro-stoppages</div>
     </div>
     """,
         unsafe_allow_html=True,
@@ -1370,28 +1584,28 @@ with col_kpi4:
         f"""
     <div class="kpi-container">
         <div class="kpi-label">Safety Overrides Enforced</div>
-        <div class="kpi-value" style="color: #EF5350;">{st.session_state.kpi_totals['safety_overrides']} Lockouts</div>
-        <div class="kpi-subtext" style="color: #EF5350;">■ Zero OSHA/IEC non-compliance</div>
+        <div class="kpi-value" style="color: #EF4444;">{st.session_state.kpi_totals['safety_overrides']} Lockouts</div>
+        <div class="kpi-subtext" style="color: #F87171;">■ Zero statutory non-compliance</div>
     </div>
     """,
         unsafe_allow_html=True,
     )
 
-st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 6. INTERACTIVE MONTHLY TREND CHART (PLOTLY GRAPH OBJECTS)
+# 7. INTERACTIVE MONTHLY TREND CHART (PLOTLY)
 # -----------------------------------------------------------------------------
 with st.container():
     st.markdown(
         """
-    <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 18px 20px 8px 20px; margin-bottom: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 16px 20px 8px 20px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <div style="font-size: 1.15rem; font-weight: 700; color: #FFFFFF;">
-                📊 Executive Capital Preservation Dynamics: Intervention Spend vs. Avoided Breakdown Exposure
+                📊 Executive Capital Dynamics: Intervention Spend vs. Avoided Breakdown Exposure
             </div>
-            <div style="font-size: 0.8rem; color: #8B949E; font-family: var(--font-mono);">
-                AUDITED HISTORICAL (JUL-AUG) + CURRENT CYCLE (SEP MTD)
+            <div style="font-size: 0.78rem; color: #94A3B8; font-family: var(--font-mono);">
+                AUDITED HISTORICAL (JUL-AUG) + LIVE CURRENT CYCLE (SEP MTD)
             </div>
         </div>
     </div>
@@ -1407,44 +1621,41 @@ with st.container():
 
     fig = go.Figure()
 
-    # Planned Intervention Costs (Option A spend)
     fig.add_trace(
         go.Bar(
             name="Planned Intervention Cost (Option A Spend)",
             x=months,
             y=planned_costs,
-            marker_color="#2E7D32",
-            marker_line_color="#4CAF50",
+            marker_color="#059669",
+            marker_line_color="#10B981",
             marker_line_width=1.5,
             hovertemplate="<b>%{x}</b><br>Planned Intervention Cost: PKR %{y:,.0f}<extra></extra>",
         )
     )
 
-    # Avoided Breakdown Exposure (Option B losses prevented)
     fig.add_trace(
         go.Bar(
             name="Avoided Breakdown Exposure (Option B Exposure)",
             x=months,
             y=exposure_avoided,
-            marker_color="#C62828",
-            marker_line_color="#EF5350",
+            marker_color="#DC2626",
+            marker_line_color="#EF4444",
             marker_line_width=1.5,
             hovertemplate="<b>%{x}</b><br>Avoided Breakdown Exposure: PKR %{y:,.0f}<extra></extra>",
         )
     )
 
-    # Net Avoided Loss Line
     fig.add_trace(
         go.Scatter(
             name="Net Capital Losses Avoided",
             x=months,
             y=net_savings,
             mode="lines+markers+text",
-            line=dict(color="#00E676", width=3, dash="dot"),
-            marker=dict(size=9, color="#00E676", symbol="diamond"),
+            line=dict(color="#34D399", width=3, dash="dot"),
+            marker=dict(size=9, color="#34D399", symbol="diamond"),
             text=[f"+PKR {v/1000000:.2f}M" for v in net_savings],
             textposition="top center",
-            textfont=dict(family="SFMono-Regular, Consolas, monospace", size=11, color="#A7F3D0"),
+            textfont=dict(family="JetBrains Mono, Consolas, monospace", size=11, color="#A7F3D0"),
             hovertemplate="<b>%{x}</b><br>Net Preserved: PKR %{y:,.0f}<extra></extra>",
         )
     )
@@ -1454,9 +1665,9 @@ with st.container():
         barmode="group",
         bargap=0.25,
         bargroupgap=0.1,
-        plot_bgcolor="#161B22",
-        paper_bgcolor="#161B22",
-        height=330,
+        plot_bgcolor="#111827",
+        paper_bgcolor="#111827",
+        height=320,
         margin=dict(l=40, r=40, t=20, b=30),
         legend=dict(
             orientation="h",
@@ -1470,22 +1681,22 @@ with st.container():
             title=dict(text="Capital Impact (PKR)", font=dict(size=12, color="#94A3B8")),
             tickprefix="PKR ",
             tickformat=",",
-            gridcolor="#2D3748",
-            zerolinecolor="#4A5568",
+            gridcolor="#1F2937",
+            zerolinecolor="#374151",
         ),
         xaxis=dict(
             tickfont=dict(size=12, color="#E2E8F0"),
-            gridcolor="#2D3748",
+            gridcolor="#1F2937",
         ),
-        font=dict(family="SFMono-Regular, Consolas, sans-serif"),
+        font=dict(family="Segoe UI, Inter, sans-serif"),
     )
 
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 # -----------------------------------------------------------------------------
-# 7. DUAL NAVIGATION VIEW SWITCHER
+# 8. DUAL NAVIGATION VIEW SWITCHER
 # -----------------------------------------------------------------------------
-st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 nav_mode = st.radio(
     "Navigation Mode",
@@ -1511,16 +1722,16 @@ def get_machine_errors(machine_id):
     return matches
 
 # -----------------------------------------------------------------------------
-# 8. MODE 1: GRAPHICAL FACTORY TOPOLOGY (1 -> 2 -> 4 DIVERGING TREE)
+# 9. MODE 1: GRAPHICAL FACTORY TOPOLOGY (WITH PHOTOS & CONVEYOR ANIMATION)
 # -----------------------------------------------------------------------------
 if st.session_state.nav_mode == "🏭 Graphical Factory Topology":
     st.markdown(
         """
     <div class="section-card">
         <div class="section-title">
-            <span>🏭 Balanced 1 ➔ 2 ➔ 4 Diverging Tree Factory Topology</span>
-            <span style="font-size: 0.8rem; font-weight: 400; color: #8B949E; margin-left: auto;">
-                Click [Inspect Asset / Select Fault] to evaluate economics in the Diagnostic Gatekeeper
+            <span>🏭 Interactive 1 ➔ 2 ➔ 4 Factory Topology with Animated Conveyor Pipelines</span>
+            <span style="font-size: 0.8rem; font-weight: 400; color: #9CA3AF; margin-left: auto;">
+                Select any machine below to inspect its fault and observe product flow halt
             </span>
         </div>
     """,
@@ -1528,66 +1739,104 @@ if st.session_state.nav_mode == "🏭 Graphical Factory Topology":
     )
 
     # --- STAGE 1: HYDRAULIC PRESS (CENTER) ---
-    st.markdown('<div class="topo-stage-header">Stage 1: Primary Forming Feeder (Single Point of Failure • 100% Loss if Tripped)</div>', unsafe_allow_html=True)
-    m1_cols = st.columns([1.5, 3, 1.5])
+    st.markdown(
+        f'<div class="topo-stage-header">Stage 1: Primary Forming Feeder (100% Plant Trip Point) &nbsp;|&nbsp; Flow: {topo_state["M-101"]["rate"]} pkts/hr</div>',
+        unsafe_allow_html=True,
+    )
+
+    m1_cols = st.columns([1.4, 3.2, 1.4])
     with m1_cols[1]:
         m101_active = (st.session_state.selected_machine == "M-101")
-        m101_class = "topo-node topo-node-active" if m101_active else "topo-node"
+        m101_class = "topo-node topo-node-halted" if m101_active else "topo-node"
         m101_meta = get_machine_meta("M-101")
+        m101_img_b64 = get_image_base64(MACHINE_IMAGES.get("M-101"))
+        m101_img_tag = (
+            f'<div class="machine-img-box"><img src="data:image/jpeg;base64,{m101_img_b64}" class="machine-img" style="height: 180px;"></div>'
+            if m101_img_b64
+            else ""
+        )
+
         st.markdown(
             f"""
         <div class="{m101_class}">
             <div class="topo-node-title">
                 <span>M-101 · {m101_meta['Machine_Type']}</span>
-                <span class="status-pill status-pill-amber">⚠ Fault Detected</span>
+                <span class="status-pill {topo_state['M-101']['pill']}">{topo_state['M-101']['text']}</span>
             </div>
-            <div class="topo-node-desc"><b>Rate:</b> 100 pkts/hr | <b>Loss Impact:</b> PKR 180,000/hr (100% Plant Trip)</div>
+            {m101_img_tag}
+            <div class="topo-node-desc"><b>Rate:</b> 100 pkts/hr | <b>Loss Impact:</b> PKR 180,000/hr (100% Loss If Tripped)</div>
             <div class="topo-node-meta">👤 Operators: {m101_meta['Operator_Assignment']}</div>
         </div>
         """,
             unsafe_allow_html=True,
         )
-        if st.button("🔍 Inspect M-101 Hydraulic Press", key="btn_m101", use_container_width=True):
+        if st.button("🔍 Inspect M-101 (Forming Press)", key="btn_m101", use_container_width=True):
             st.session_state.selected_machine = "M-101"
             m_errs = get_machine_errors("M-101")
             st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
             st.rerun()
 
-    # Split Arrow 1 -> 2
+    # --- ANIMATED CONVEYOR SPLIT 1 -> 2 (SVG) ---
+    p1 = topo_state["pipes"]["m101_to_m201"]
+    p2 = topo_state["pipes"]["m101_to_m202"]
+
     st.markdown(
-        """
-        <div class="pipe-connector">
-            │<br>
-            ┌───────────────┴───────────────┐<br>
-            ▼                               ▼
-        </div>
-        """,
+        f"""
+    <div style="text-align: center; margin: 4px 0 10px 0;">
+        <svg width="100%" height="70" viewBox="0 0 700 70" preserveAspectRatio="none" style="overflow: visible;">
+            <!-- Feeder stem track -->
+            <path d="M 350 0 L 350 25" class="conveyor-track" />
+            <!-- Split track left and right -->
+            <path d="M 350 25 L 175 25 L 175 70" class="conveyor-track" />
+            <path d="M 350 25 L 525 25 L 525 70" class="conveyor-track" />
+            
+            <!-- Dynamic Conveyor Flow Streams -->
+            <path d="M 350 0 L 350 25 L 175 25 L 175 70" class="{p1}" />
+            <path d="M 350 0 L 350 25 L 525 25 L 525 70" class="{p2}" />
+            
+            <!-- Flow Indicators -->
+            <circle cx="175" cy="65" r="4" fill="{'#EF4444' if 'stopped' in p1 else '#10B981'}" />
+            <circle cx="525" cy="65" r="4" fill="{'#EF4444' if 'stopped' in p2 else '#10B981'}" />
+        </svg>
+    </div>
+    """,
         unsafe_allow_html=True,
     )
 
     # --- STAGE 2: CNC MILLS (2 COLUMNS) ---
-    st.markdown('<div class="topo-stage-header">Stage 2: High-Speed Milling Split (Parallel Split • 50% Loss if Tripped)</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="topo-stage-header">Stage 2: High-Speed Milling Split (Parallel 50% Streams) &nbsp;|&nbsp; Combined: {topo_state["M-201"]["rate"] + topo_state["M-202"]["rate"]} pkts/hr</div>',
+        unsafe_allow_html=True,
+    )
     m2_cols = st.columns(2)
 
     # M-201
     with m2_cols[0]:
         m201_active = (st.session_state.selected_machine == "M-201")
-        m201_class = "topo-node topo-node-active" if m201_active else "topo-node"
+        m201_class = "topo-node topo-node-halted" if m201_active else ("topo-node topo-node-active" if topo_state["M-201"]["status"] == "STARVED" else "topo-node")
         m201_meta = get_machine_meta("M-201")
+        m201_img_b64 = get_image_base64(MACHINE_IMAGES.get("M-201"))
+        m201_img_tag = (
+            f'<div class="machine-img-box"><img src="data:image/jpeg;base64,{m201_img_b64}" class="machine-img" style="height: 140px;"></div>'
+            if m201_img_b64
+            else ""
+        )
+
         st.markdown(
             f"""
         <div class="{m201_class}">
             <div class="topo-node-title">
                 <span>M-201 · CNC Mill A</span>
-                <span class="status-pill status-pill-green">● Normal / Wear Check</span>
+                <span class="status-pill {topo_state['M-201']['pill']}">{topo_state['M-201']['text']}</span>
             </div>
-            <div class="topo-node-desc"><b>Rate:</b> 50 pkts/hr | <b>Loss Impact:</b> PKR 120,000/hr (Downstream Cells Starve)</div>
+            {m201_img_tag}
+            <div class="topo-node-desc"><b>Rate:</b> 50 pkts/hr | <b>Loss Impact:</b> PKR 120,000/hr (Feeds Cells M-301 & M-302)</div>
             <div class="topo-node-meta">👤 Operator: {m201_meta['Operator_Assignment']}</div>
         </div>
         """,
             unsafe_allow_html=True,
         )
-        if st.button("🔍 Inspect M-201 CNC Mill A", key="btn_m201", use_container_width=True):
+        if st.button("🔍 Inspect M-201 (CNC Mill A)", key="btn_m201", use_container_width=True):
             st.session_state.selected_machine = "M-201"
             m_errs = get_machine_errors("M-201")
             st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
@@ -1596,57 +1845,98 @@ if st.session_state.nav_mode == "🏭 Graphical Factory Topology":
     # M-202
     with m2_cols[1]:
         m202_active = (st.session_state.selected_machine == "M-202")
-        m202_class = "topo-node topo-node-active" if m202_active else "topo-node"
+        m202_class = "topo-node topo-node-halted" if m202_active else ("topo-node topo-node-active" if topo_state["M-202"]["status"] == "STARVED" else "topo-node")
         m202_meta = get_machine_meta("M-202")
+        m202_img_b64 = get_image_base64(MACHINE_IMAGES.get("M-202"))
+        m202_img_tag = (
+            f'<div class="machine-img-box"><img src="data:image/jpeg;base64,{m202_img_b64}" class="machine-img" style="height: 140px;"></div>'
+            if m202_img_b64
+            else ""
+        )
+
         st.markdown(
             f"""
         <div class="{m202_class}">
             <div class="topo-node-title">
                 <span>M-202 · CNC Mill B</span>
-                <span class="status-pill status-pill-green">● Normal / Wear Check</span>
+                <span class="status-pill {topo_state['M-202']['pill']}">{topo_state['M-202']['text']}</span>
             </div>
-            <div class="topo-node-desc"><b>Rate:</b> 50 pkts/hr | <b>Loss Impact:</b> PKR 120,000/hr (Downstream Cells Starve)</div>
+            {m202_img_tag}
+            <div class="topo-node-desc"><b>Rate:</b> 50 pkts/hr | <b>Loss Impact:</b> PKR 120,000/hr (Feeds Cells M-303 & M-304)</div>
             <div class="topo-node-meta">👤 Operator: {m202_meta['Operator_Assignment']}</div>
         </div>
         """,
             unsafe_allow_html=True,
         )
-        if st.button("🔍 Inspect M-202 CNC Mill B", key="btn_m202", use_container_width=True):
+        if st.button("🔍 Inspect M-202 (CNC Mill B)", key="btn_m202", use_container_width=True):
             st.session_state.selected_machine = "M-202"
             m_errs = get_machine_errors("M-202")
             st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
             st.rerun()
 
-    # Split Arrow 2 -> 4
+    # --- ANIMATED CONVEYOR SPLIT 2 -> 4 (SVG) ---
+    p201_301 = topo_state["pipes"]["m201_to_m301"]
+    p201_302 = topo_state["pipes"]["m201_to_m302"]
+    p202_303 = topo_state["pipes"]["m202_to_m303"]
+    p202_304 = topo_state["pipes"]["m202_to_m304"]
+
     st.markdown(
-        """
-        <div class="pipe-connector" style="display: flex; justify-content: space-around;">
-            <div>│<br>┌───────┴───────┐<br>▼               ▼</div>
-            <div>│<br>┌───────┴───────┐<br>▼               ▼</div>
-        </div>
-        """,
+        f"""
+    <div style="text-align: center; margin: 4px 0 10px 0;">
+        <svg width="100%" height="70" viewBox="0 0 800 70" preserveAspectRatio="none" style="overflow: visible;">
+            <!-- Left Mill A Split (feeds 301, 302) -->
+            <path d="M 200 0 L 200 25 L 100 25 L 100 70" class="conveyor-track" />
+            <path d="M 200 25 L 300 25 L 300 70" class="conveyor-track" />
+            <path d="M 200 0 L 200 25 L 100 25 L 100 70" class="{p201_301}" />
+            <path d="M 200 25 L 300 25 L 300 70" class="{p201_302}" />
+            
+            <!-- Right Mill B Split (feeds 303, 304) -->
+            <path d="M 600 0 L 600 25 L 500 25 L 500 70" class="conveyor-track" />
+            <path d="M 600 25 L 700 25 L 700 70" class="conveyor-track" />
+            <path d="M 600 0 L 600 25 L 500 25 L 500 70" class="{p202_303}" />
+            <path d="M 600 25 L 700 25 L 700 70" class="{p202_304}" />
+            
+            <!-- Terminus Flow Dots -->
+            <circle cx="100" cy="65" r="4" fill="{'#EF4444' if 'stopped' in p201_301 else '#10B981'}" />
+            <circle cx="300" cy="65" r="4" fill="{'#EF4444' if 'stopped' in p201_302 else '#10B981'}" />
+            <circle cx="500" cy="65" r="4" fill="{'#EF4444' if 'stopped' in p202_303 else '#10B981'}" />
+            <circle cx="700" cy="65" r="4" fill="{'#EF4444' if 'stopped' in p202_304 else '#10B981'}" />
+        </svg>
+    </div>
+    """,
         unsafe_allow_html=True,
     )
 
     # --- STAGE 3: PACKAGING CELLS (4 COLUMNS) ---
-    st.markdown('<div class="topo-stage-header">Stage 3: Automated Packaging Quad Cells (Quad Split • 25% Loss per Cell)</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="topo-stage-header">Stage 3: Automated Packaging Quad Cells (25% Split per Station) &nbsp;|&nbsp; Combined: {sum(topo_state[m]["rate"] for m in ["M-301", "M-302", "M-303", "M-304"])} pkts/hr</div>',
+        unsafe_allow_html=True,
+    )
     m3_cols = st.columns(4)
 
     pkg_machines = ["M-301", "M-302", "M-303", "M-304"]
     for i, m_id in enumerate(pkg_machines):
         with m3_cols[i]:
             m_active = (st.session_state.selected_machine == m_id)
-            m_class = "topo-node topo-node-active" if m_active else "topo-node"
+            m_class = "topo-node topo-node-halted" if m_active else ("topo-node topo-node-active" if topo_state[m_id]["status"] == "STARVED" else "topo-node")
             m_meta = get_machine_meta(m_id)
+            pkg_img_b64 = get_image_base64(MACHINE_IMAGES.get(m_id))
+            pkg_img_tag = (
+                f'<div class="machine-img-box"><img src="data:image/jpeg;base64,{pkg_img_b64}" class="machine-img" style="height: 100px;"></div>'
+                if pkg_img_b64
+                else ""
+            )
+
             st.markdown(
                 f"""
             <div class="{m_class}">
                 <div class="topo-node-title">
                     <span style="font-size: 0.95rem;">{m_id}</span>
-                    <span class="status-pill status-pill-green">● Running</span>
+                    <span class="status-pill {topo_state[m_id]['pill']}">{topo_state[m_id]['text']}</span>
                 </div>
-                <div class="topo-node-desc" style="font-size: 0.78rem;"><b>Cap:</b> 25 pkts/hr | <b>Loss:</b> PKR 45k/hr</div>
-                <div class="topo-node-meta" style="font-size: 0.74rem;">👤 {m_meta['Operator_Assignment'].split(';')[0]}</div>
+                {pkg_img_tag}
+                <div class="topo-node-desc" style="font-size: 0.76rem;"><b>Cap:</b> 25 pkts/hr | <b>Loss:</b> PKR 45k/hr</div>
+                <div class="topo-node-meta" style="font-size: 0.72rem;">👤 {m_meta['Operator_Assignment'].split(';')[0]}</div>
             </div>
             """,
                 unsafe_allow_html=True,
@@ -1660,7 +1950,7 @@ if st.session_state.nav_mode == "🏭 Graphical Factory Topology":
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 9. MODE 2: DROPDOWN / MANUAL ENTRY STYLE
+# 10. MODE 2: DROPDOWN / MANUAL ENTRY STYLE
 # -----------------------------------------------------------------------------
 else:
     st.markdown(
@@ -1711,7 +2001,7 @@ else:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 10. ACTIVE DIAGNOSTIC CONTEXT & FAULT SELECTOR (IF IN TOPOLOGY MODE)
+# 11. ACTIVE FAULT SELECTOR (HORIZONTALS)
 # -----------------------------------------------------------------------------
 curr_machine_id = st.session_state.selected_machine
 machine_meta = get_machine_meta(curr_machine_id)
@@ -1720,8 +2010,8 @@ avail_errors = get_machine_errors(curr_machine_id)
 if st.session_state.nav_mode == "🏭 Graphical Factory Topology":
     st.markdown(
         f"""
-    <div style="background: #131722; border: 1px solid #2D3748; border-radius: 8px; padding: 14px 20px; margin-bottom: 20px;">
-        <div style="font-size: 0.88rem; font-weight: 700; color: #90CDF4; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
+    <div style="background: #111827; border: 1px solid #374151; border-radius: 8px; padding: 14px 20px; margin-bottom: 20px;">
+        <div style="font-size: 0.88rem; font-weight: 700; color: #38BDF8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
             Active Fault Library for {curr_machine_id} ({machine_meta['Machine_Type']}):
         </div>
     """,
@@ -1754,14 +2044,14 @@ else:
     active_error = active_error_match.iloc[0].to_dict()
 
 # -----------------------------------------------------------------------------
-# 11. DIAGNOSTIC & FINANCIAL DECISION GATEKEEPER
+# 12. DIAGNOSTIC & FINANCIAL DECISION GATEKEEPER
 # -----------------------------------------------------------------------------
 st.markdown(
     """
 <div class="section-card">
     <div class="section-title">
         <span>⚖️ Diagnostic & Financial Decision Gatekeeper</span>
-        <span style="font-size: 0.82rem; font-weight: 400; color: #8B949E; margin-left: auto;">
+        <span style="font-size: 0.82rem; font-weight: 400; color: #9CA3AF; margin-left: auto;">
             Deterministic calculations evaluated strictly outside the LLM
         </span>
     </div>
@@ -1773,23 +2063,35 @@ is_safety = bool(active_error.get("Safety_Critical", False))
 badge_color = "status-pill-red" if is_safety else "status-pill-amber"
 badge_text = "SAFETY CRITICAL LOCKOUT" if is_safety else f"{active_error.get('Failure_Category', 'Mechanical').upper()} INTERVENTION REQUIRED"
 
+curr_img_b64 = get_image_base64(MACHINE_IMAGES.get(curr_machine_id))
+diag_thumb_tag = (
+    f'<img src="data:image/jpeg;base64,{curr_img_b64}" style="width: 170px; height: 95px; object-fit: cover; border-radius: 6px; border: 1.5px solid #38BDF8; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">'
+    if curr_img_b64
+    else ""
+)
+
 st.markdown(
     f"""
 <div class="diagnostic-header">
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <div class="diag-title">
-            Asset: <span style="color: #60A5FA;">{curr_machine_id} · {machine_meta['Machine_Type']}</span>
-            &nbsp;|&nbsp; Fault Code: <span style="color: #FCD34D;">{active_error['Error_ID']}</span>
-            &nbsp;|&nbsp; <span style="color: #E2E8F0;">{active_error['Failure_Mode']}</span>
+    <div>
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div class="diag-title">
+                Asset: <span style="color: #60A5FA;">{curr_machine_id} · {machine_meta['Machine_Type']}</span>
+                &nbsp;|&nbsp; Fault Code: <span style="color: #FCD34D;">{active_error['Error_ID']}</span>
+                &nbsp;|&nbsp; <span style="color: #F3F4F6;">{active_error['Failure_Mode']}</span>
+            </div>
+            <div>
+                <span class="status-pill {badge_color}">{badge_text}</span>
+            </div>
         </div>
-        <div>
-            <span class="status-pill {badge_color}">{badge_text}</span>
+        <div class="diag-meta">
+            <b>Observed Symptom:</b> <i>"{active_error.get('Symptom', 'Degradation detected')}"</i><br>
+            <b>Assigned Shift Operators:</b> {machine_meta['Operator_Assignment']} &nbsp;|&nbsp;
+            <b>Line Loss Rate:</b> PKR {machine_meta['Line_Loss_Rate_PKR_hr']:,.0f}/hr ({machine_meta['Throughput_Loss_if_Trip_pct']}% capacity loss)
         </div>
     </div>
-    <div class="diag-meta" style="margin-top: 8px;">
-        <b>Observed Symptom:</b> <i>"{active_error.get('Symptom', 'Degradation detected')}"</i><br>
-        <b>Assigned Shift Operators:</b> {machine_meta['Operator_Assignment']} &nbsp;|&nbsp;
-        <b>Line Loss Rate:</b> PKR {machine_meta['Line_Loss_Rate_PKR_hr']:,.0f}/hr ({machine_meta['Throughput_Loss_if_Trip_pct']}% capacity loss)
+    <div>
+        {diag_thumb_tag}
     </div>
 </div>
 """,
@@ -1807,7 +2109,7 @@ if is_safety:
         <div class="safety-alert-body">
             <b>Statutory Code Violation (OSHA 1910.212 / IEC 62061 SIL-2/3):</b><br>
             {active_error.get('Safety_Message', 'Operating with compromised safety circuitry or disabled interlocks violates statutory machinery safety regulations.')}<br>
-            <div style="margin-top: 10px; font-weight: 700; color: #FFFFFF;">
+            <div style="margin-top: 8px; font-weight: 700; color: #FFFFFF;">
                 🔒 OPTION B (RUN-TO-FAILURE) IS STATUTORILY LOCKED OUT. Economic deferral is strictly prohibited under industrial compliance codes.
             </div>
         </div>
@@ -1830,13 +2132,13 @@ with col_opt_a:
     st.markdown(
         f"""
     <div class="option-card option-a-card">
-        <div class="option-header" style="color: #4CAF50;">
+        <div class="option-header" style="color: #34D399;">
             <span>Option A: Intervene Now</span>
             <span class="status-pill status-pill-green">Planned Preventative Stop</span>
         </div>
         <div class="cost-row">
             <span class="cost-label">⏱ Planned Stoppage Duration:</span>
-            <span class="cost-value" style="color: #81C784;">{opt_a_mins:.0f} mins ({(opt_a_mins/60.0):.2f} hrs)</span>
+            <span class="cost-value" style="color: #6EE7B7;">{opt_a_mins:.0f} mins ({(opt_a_mins/60.0):.2f} hrs)</span>
         </div>
         <div class="cost-row">
             <span class="cost-label">📉 Lost Production Capacity Cost:</span>
@@ -1860,7 +2162,7 @@ with col_opt_a:
         </div>
         <div class="total-cost-box total-cost-box-a">
             <div class="total-cost-label" style="color: #A7F3D0;">Total Planned Intervention Spend</div>
-            <div class="total-cost-value" style="color: #4CAF50;">PKR {opt_a_total:,.0f}</div>
+            <div class="total-cost-value" style="color: #10B981;">PKR {opt_a_total:,.0f}</div>
         </div>
     </div>
     """,
@@ -1873,23 +2175,23 @@ with col_opt_b:
         st.markdown(
             f"""
         <div class="option-card option-b-card option-b-locked">
-            <div class="option-header" style="color: #94A3B8;">
+            <div class="option-header" style="color: #9CA3AF;">
                 <span>Option B: Run to Fail / Defer</span>
                 <span class="status-pill status-pill-red">LOCKED OUT</span>
             </div>
             <div style="text-align: center; padding: 40px 10px;">
                 <div style="font-size: 3.5rem; margin-bottom: 10px;">🔒</div>
-                <div style="font-size: 1.2rem; font-weight: 700; color: #EF5350;">
+                <div style="font-size: 1.2rem; font-weight: 700; color: #EF4444;">
                     STATUTORY SAFETY LOCKOUT
                 </div>
-                <p style="color: #94A3B8; font-size: 0.9rem; margin-top: 8px;">
+                <p style="color: #9CA3AF; font-size: 0.9rem; margin-top: 8px;">
                     Running with this fault violates ISO 13849-1 and statutory safety law.<br>
                     Cost modeling is disabled because this action is legally prohibited.
                 </p>
             </div>
-            <div class="total-cost-box" style="background: rgba(45, 55, 72, 0.4); border: 1px solid #4A5568;">
-                <div class="total-cost-label" style="color: #94A3B8;">Option B Financial Exposure</div>
-                <div class="total-cost-value" style="color: #94A3B8;">PROHIBITED</div>
+            <div class="total-cost-box" style="background: rgba(45, 55, 72, 0.4); border: 1px solid #4B5563;">
+                <div class="total-cost-label" style="color: #9CA3AF;">Option B Financial Exposure</div>
+                <div class="total-cost-value" style="color: #9CA3AF;">PROHIBITED</div>
             </div>
         </div>
         """,
@@ -1910,13 +2212,13 @@ with col_opt_b:
         st.markdown(
             f"""
         <div class="option-card option-b-card">
-            <div class="option-header" style="color: #EF5350;">
+            <div class="option-header" style="color: #F87171;">
                 <span>Option B: Run to Fail / Repair Later</span>
                 <span class="status-pill status-pill-red">Catastrophic Breakdown</span>
             </div>
             <div class="cost-row">
                 <span class="cost-label">💥 Catastrophic Breakdown Downtime:</span>
-                <span class="cost-value" style="color: #EF5350;">{opt_b_mins:.0f} mins ({(opt_b_mins/60.0):.2f} hrs)</span>
+                <span class="cost-value" style="color: #F87171;">{opt_b_mins:.0f} mins ({(opt_b_mins/60.0):.2f} hrs)</span>
             </div>
             <div class="cost-row">
                 <span class="cost-label">📉 Compounded Lost Production:</span>
@@ -1944,7 +2246,7 @@ with col_opt_b:
             </div>
             <div class="total-cost-box total-cost-box-b">
                 <div class="total-cost-label" style="color: #FECDD3;">Total Catastrophic Exposure</div>
-                <div class="total-cost-value" style="color: #EF5350;">PKR {opt_b_total:,.0f}</div>
+                <div class="total-cost-value" style="color: #EF4444;">PKR {opt_b_total:,.0f}</div>
             </div>
         </div>
         """,
@@ -1983,9 +2285,9 @@ if not is_safety:
     )
 
 # -----------------------------------------------------------------------------
-# 12. OPERATOR ACTIONS & REAL-TIME AUDIT LOGGING
+# 13. OPERATOR ACTIONS & REAL-TIME AUDIT LOGGING
 # -----------------------------------------------------------------------------
-st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 st.markdown("### 📋 Operator Execution & Handover Protocol")
 
 if is_safety:
@@ -2049,12 +2351,10 @@ else:
             }
             st.session_state.history_log.insert(0, new_event)
 
-            # Update KPI counters
             st.session_state.kpi_totals["net_loss_avoided"] += net_val
             st.session_state.kpi_totals["hours_rescued"] += rescued_hrs
             st.session_state.kpi_totals["stops_approved"] += 1
 
-            # Update monthly totals
             st.session_state.monthly_summary["2026-09"]["planned"] += opt_a_total
             st.session_state.monthly_summary["2026-09"]["exposure"] += opt_b_total
             st.session_state.monthly_summary["2026-09"]["net"] += net_val
@@ -2101,14 +2401,14 @@ else:
 st.markdown("</div>", unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 13. AUDIT TRAIL & SHIFT HANDOVER LOG
+# 14. AUDIT TRAIL & SHIFT HANDOVER LOG
 # -----------------------------------------------------------------------------
 st.markdown(
     """
 <div class="section-card">
     <div class="section-title">
         <span>📜 Plant Shift Handover & Decision Audit Trail</span>
-        <span style="font-size: 0.8rem; font-weight: 400; color: #8B949E; margin-left: auto;">
+        <span style="font-size: 0.8rem; font-weight: 400; color: #9CA3AF; margin-left: auto;">
             Live immutable decision ledger (July 2026 – Date)
         </span>
     </div>
@@ -2160,11 +2460,11 @@ st.download_button(
 st.markdown("</div>", unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 14. FOOTER
+# 15. FOOTER
 # -----------------------------------------------------------------------------
 st.markdown(
     """
-<div style="text-align: center; color: #64748B; font-size: 0.82rem; margin-top: 30px; padding: 20px 0; border-top: 1px solid #1E293B;">
+<div style="text-align: center; color: #64748B; font-size: 0.82rem; margin-top: 25px; padding: 18px 0; border-top: 1px solid #1F2937;">
     Industrial AI Hackathon • Cohort 11 Research Edition • Built with Streamlit & Plotly • Zero External LLM Math Dependencies
 </div>
 """,
