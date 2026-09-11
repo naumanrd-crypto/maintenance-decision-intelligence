@@ -1569,6 +1569,9 @@ if "eval_mode" not in st.session_state:
 if "active_fault_machine" not in st.session_state:
     st.session_state.active_fault_machine = None
 
+if "inspecting_machine" not in st.session_state:
+    st.session_state.inspecting_machine = None
+
 if "selected_machine" not in st.session_state:
     st.session_state.selected_machine = "M-101"
 
@@ -1613,7 +1616,7 @@ if "defer_remark" not in st.session_state:
     st.session_state.defer_remark = ""
 
 # -----------------------------------------------------------------------------
-# 4. MASTER DATA ACCESSORS & TOPOLOGY FLOW CALCULATOR
+# 4. MASTER DATA ACCESSORS & FLOW CALCULATOR
 # -----------------------------------------------------------------------------
 def get_machine_meta(machine_id):
     row = assets_df[assets_df["Machine_ID"] == machine_id]
@@ -1631,19 +1634,17 @@ def get_machine_errors(machine_id):
 
 def get_topology_flow_state(active_fault_m):
     """
-    Computes exact throughputs and pipeline states across the 1 -> 2 -> 4 tree.
-    When active_fault_m is None, ALL 7 machines are RUNNING at 100% capacity (100 pkts/hr total).
-    When a machine has an active fault, that line halts (0 pkts/hr), and
-    downstream starve conditions propagate.
+    Computes visual status and conveyor pipeline animations across the 1 -> 2 -> 4 tree.
+    Status text is kept clean and simple (● Running / ⛔ Halted / ⚠️ Starved) without packet clutter.
     """
     state = {
-        "M-101": {"status": "RUNNING", "rate": 100, "pill": "status-pill-green", "text": "● 100 pkts/hr"},
-        "M-201": {"status": "RUNNING", "rate": 50, "pill": "status-pill-green", "text": "● 50 pkts/hr"},
-        "M-202": {"status": "RUNNING", "rate": 50, "pill": "status-pill-green", "text": "● 50 pkts/hr"},
-        "M-301": {"status": "RUNNING", "rate": 25, "pill": "status-pill-green", "text": "● 25 pkts/hr"},
-        "M-302": {"status": "RUNNING", "rate": 25, "pill": "status-pill-green", "text": "● 25 pkts/hr"},
-        "M-303": {"status": "RUNNING", "rate": 25, "pill": "status-pill-green", "text": "● 25 pkts/hr"},
-        "M-304": {"status": "RUNNING", "rate": 25, "pill": "status-pill-green", "text": "● 25 pkts/hr"},
+        "M-101": {"status": "RUNNING", "pill": "status-pill-green", "text": "● Running"},
+        "M-201": {"status": "RUNNING", "pill": "status-pill-green", "text": "● Running"},
+        "M-202": {"status": "RUNNING", "pill": "status-pill-green", "text": "● Running"},
+        "M-301": {"status": "RUNNING", "pill": "status-pill-green", "text": "● Running"},
+        "M-302": {"status": "RUNNING", "pill": "status-pill-green", "text": "● Running"},
+        "M-303": {"status": "RUNNING", "pill": "status-pill-green", "text": "● Running"},
+        "M-304": {"status": "RUNNING", "pill": "status-pill-green", "text": "● Running"},
         "pipes": {
             "m101_to_m201": "flow-line-moving",
             "m101_to_m202": "flow-line-moving",
@@ -1652,46 +1653,36 @@ def get_topology_flow_state(active_fault_m):
             "m202_to_m303": "flow-line-moving",
             "m202_to_m304": "flow-line-moving",
         },
-        "total_output": 100,
-        "loss_pct": 0,
     }
 
     if not active_fault_m:
         return state
 
     if active_fault_m == "M-101":
-        state["M-101"] = {"status": "HALTED", "rate": 0, "pill": "status-pill-red", "text": "⛔ HALTED (0 pkts/hr)"}
-        for m in ["M-201", "M-202"]:
-            state[m] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
-        for m in ["M-301", "M-302", "M-303", "M-304"]:
-            state[m] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
+        state["M-101"] = {"status": "HALTED", "pill": "status-pill-red", "text": "⛔ Halted"}
+        for m in ["M-201", "M-202", "M-301", "M-302", "M-303", "M-304"]:
+            state[m] = {"status": "STARVED", "pill": "status-pill-amber", "text": "⚠️ Starved"}
         for p in state["pipes"]:
             state["pipes"][p] = "flow-line-stopped"
-        state["total_output"] = 0
-        state["loss_pct"] = 100
 
     elif active_fault_m == "M-201":
-        state["M-201"] = {"status": "HALTED", "rate": 0, "pill": "status-pill-red", "text": "⛔ HALTED (0 pkts/hr)"}
-        state["M-301"] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
-        state["M-302"] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
+        state["M-201"] = {"status": "HALTED", "pill": "status-pill-red", "text": "⛔ Halted"}
+        state["M-301"] = {"status": "STARVED", "pill": "status-pill-amber", "text": "⚠️ Starved"}
+        state["M-302"] = {"status": "STARVED", "pill": "status-pill-amber", "text": "⚠️ Starved"}
         state["pipes"]["m101_to_m201"] = "flow-line-stopped"
         state["pipes"]["m201_to_m301"] = "flow-line-stopped"
         state["pipes"]["m201_to_m302"] = "flow-line-stopped"
-        state["total_output"] = 50
-        state["loss_pct"] = 50
 
     elif active_fault_m == "M-202":
-        state["M-202"] = {"status": "HALTED", "rate": 0, "pill": "status-pill-red", "text": "⛔ HALTED (0 pkts/hr)"}
-        state["M-303"] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
-        state["M-304"] = {"status": "STARVED", "rate": 0, "pill": "status-pill-amber", "text": "⚠️ STARVED (0 pkts/hr)"}
+        state["M-202"] = {"status": "HALTED", "pill": "status-pill-red", "text": "⛔ Halted"}
+        state["M-303"] = {"status": "STARVED", "pill": "status-pill-amber", "text": "⚠️ Starved"}
+        state["M-304"] = {"status": "STARVED", "pill": "status-pill-amber", "text": "⚠️ Starved"}
         state["pipes"]["m101_to_m202"] = "flow-line-stopped"
         state["pipes"]["m202_to_m303"] = "flow-line-stopped"
         state["pipes"]["m202_to_m304"] = "flow-line-stopped"
-        state["total_output"] = 50
-        state["loss_pct"] = 50
 
     elif active_fault_m in ["M-301", "M-302", "M-303", "M-304"]:
-        state[active_fault_m] = {"status": "HALTED", "rate": 0, "pill": "status-pill-red", "text": "⛔ HALTED (0 pkts/hr)"}
+        state[active_fault_m] = {"status": "HALTED", "pill": "status-pill-red", "text": "⛔ Halted"}
         if active_fault_m == "M-301":
             state["pipes"]["m201_to_m301"] = "flow-line-stopped"
         elif active_fault_m == "M-302":
@@ -1700,12 +1691,260 @@ def get_topology_flow_state(active_fault_m):
             state["pipes"]["m202_to_m303"] = "flow-line-stopped"
         elif active_fault_m == "M-304":
             state["pipes"]["m202_to_m304"] = "flow-line-stopped"
-        state["total_output"] = 75
-        state["loss_pct"] = 25
 
     return state
 
 topo_state = get_topology_flow_state(st.session_state.active_fault_machine)
+
+# -----------------------------------------------------------------------------
+# 5. INLINE ON-THE-SPOT DECISION PANEL COMPONENT
+# -----------------------------------------------------------------------------
+def render_spot_decision_panel(machine_id):
+    """
+    Renders the fault options and Option A vs Option B comparison directly at the machine.
+    Upon accepting Option A, process resumes immediately, panel dismisses, and normal flow restores.
+    """
+    meta = get_machine_meta(machine_id)
+    avail_errors = get_machine_errors(machine_id)
+
+    # Ensure selected error belongs to this machine
+    err_ids = avail_errors["Error_ID"].tolist()
+    if st.session_state.selected_error_id not in err_ids:
+        st.session_state.selected_error_id = err_ids[0]
+
+    curr_err_match = avail_errors[avail_errors["Error_ID"] == st.session_state.selected_error_id]
+    curr_err = curr_err_match.iloc[0].to_dict() if not curr_err_match.empty else avail_errors.iloc[0].to_dict()
+
+    is_safety = bool(curr_err.get("Safety_Critical", False))
+
+    # Deterministic calculations
+    opt_a_mins = float(curr_err.get("Planned_Downtime_min", 10))
+    opt_a_lost_prod = float(curr_err.get("Planned_Production_Loss_PKR", (opt_a_mins / 60.0) * meta["Line_Loss_Rate_PKR_hr"]))
+    opt_a_labor = float(curr_err.get("OptionA_Labor_Cost_PKR", 2500))
+    opt_a_part_cost = float(curr_err.get("OptionA_Part_Cost_PKR", 5000))
+    opt_a_part_desc = curr_err.get("OptionA_Part_Description", "Consumable / Wear Part")
+    opt_a_total = float(curr_err.get("OptionA_Total_PKR", opt_a_lost_prod + opt_a_labor + opt_a_part_cost))
+
+    opt_b_mins = float(curr_err.get("Unplanned_Downtime_min", 120))
+    opt_b_lost_prod = float(curr_err.get("Unplanned_Production_Loss_PKR", (opt_b_mins / 60.0) * meta["Line_Loss_Rate_PKR_hr"]))
+    opt_b_idle_labor = float(curr_err.get("OptionB_Idle_Operator_Cost_PKR", 12000))
+    opt_b_emerg_tech = float(curr_err.get("OptionB_Emergency_Tech_Cost_PKR", 25000))
+    opt_b_part_cost = float(curr_err.get("OptionB_Replacement_Cost_PKR", 150000))
+    opt_b_part_desc = curr_err.get("OptionB_Replacement_Description", "Core Sub-Assembly")
+    opt_b_freight = float(curr_err.get("OptionB_Freight_PKR", 25000))
+    opt_b_scrap_cost = float(curr_err.get("OptionB_Scrap_Cost_PKR", 20000))
+    opt_b_total = float(curr_err.get("OptionB_Total_PKR", opt_b_lost_prod + opt_b_idle_labor + opt_b_emerg_tech + opt_b_part_cost + opt_b_freight + opt_b_scrap_cost))
+
+    net_val = opt_b_total - opt_a_total
+    hours_saved = (opt_b_mins - opt_a_mins) / 60.0
+
+    st.markdown(
+        f"""
+        <div style="background: #FFFFFF; border: 2px solid #0284C7; border-radius: 10px; padding: 16px 20px; margin: 10px 0 16px 0; box-shadow: 0 4px 16px rgba(2, 132, 199, 0.12);">
+            <div style="font-size: 1.05rem; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">
+                <span>⚡</span> <span>Diagnostic Station: {machine_id} · {meta['Machine_Type']}</span>
+            </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Fault selection pills next to machine
+    st.markdown("<div style='font-size: 0.82rem; font-weight: 700; color: #0284C7; text-transform: uppercase; margin-bottom: 8px;'>Select Error / Symptom to Evaluate:</div>", unsafe_allow_html=True)
+    f_cols = st.columns(len(avail_errors))
+    for idx, (_, e_row) in enumerate(avail_errors.iterrows()):
+        e_id = e_row["Error_ID"]
+        is_sel = (e_id == st.session_state.selected_error_id)
+        lbl = f"🛑 {e_id}: {e_row['Failure_Mode']}" if e_row["Safety_Critical"] else f"⚡ {e_id}: {e_row['Failure_Mode']}"
+        with f_cols[idx]:
+            if st.button(lbl, key=f"btn_err_{machine_id}_{e_id}", type="primary" if is_sel else "secondary", use_container_width=True):
+                st.session_state.selected_error_id = e_id
+                st.session_state.active_fault_machine = machine_id
+                st.session_state.selected_machine = machine_id
+                st.rerun()
+
+    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+
+    # On-the-spot comparison
+    if is_safety:
+        st.markdown(
+            f"""
+            <div class="safety-alert-banner" style="margin: 8px 0 12px 0; padding: 14px 18px;">
+                <div class="safety-alert-title" style="font-size: 1.05rem;">
+                    <span>🛑 MANDATORY SAFETY OVERRIDE: STATUTORY SHUTDOWN ENFORCED</span>
+                </div>
+                <div class="safety-alert-body" style="font-size: 0.86rem;">
+                    <b>Statutory Code Violation (OSHA / IEC 62061 SIL-2/3):</b><br>
+                    {curr_err.get('Safety_Message', 'Operating with compromised safety circuitry or disabled interlocks violates statutory machinery safety regulations.')}<br>
+                    <div style="margin-top: 6px; font-weight: 700; color: #991B1B;">
+                        🔒 Option B is statutorily prohibited. Safe lockout must be enforced.
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        s_col1, s_col2 = st.columns([2, 1])
+        with s_col1:
+            if st.button("🛑 Enforce Immediate Safety Stop & Lockout", key=f"btn_safety_exec_{machine_id}", type="primary", use_container_width=True):
+                new_event = {
+                    "Event_Date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                    "Month_Key": "2026-09",
+                    "Machine_ID": machine_id,
+                    "Error_ID": curr_err["Error_ID"],
+                    "Stage": meta["Stage"],
+                    "Failure_Category": "Safety",
+                    "Failure_Mode": curr_err["Failure_Mode"],
+                    "Reported_By": meta["Operator_Assignment"].split("(")[0].strip(),
+                    "Shift": "A",
+                    "Decision": "Mandatory Safety Lockout",
+                    "Safety_Override": "Yes",
+                    "Planned_Stop_Min": opt_a_mins,
+                    "Unplanned_Downtime_Min": 0.0,
+                    "OptionA_Total_PKR": opt_a_total,
+                    "OptionB_Total_PKR": 0.0,
+                    "Net_Avoided_Loss_PKR": 0.0,
+                    "Production_Hours_Rescued": 0.0,
+                    "Notes": f"Statutory Safety Lockout enforced for {curr_err['Failure_Mode']}.",
+                }
+                st.session_state.history_log.insert(0, new_event)
+                st.session_state.kpi_totals["safety_overrides"] += 1
+                st.session_state.active_fault_machine = None
+                st.session_state.inspecting_machine = None
+                st.toast(f"🛑 Safety lockout executed for {machine_id}. Safe isolation logged.", icon="🛑")
+                st.rerun()
+        with s_col2:
+            if st.button("✖ Cancel / Close", key=f"btn_close_safety_{machine_id}", use_container_width=True):
+                st.session_state.inspecting_machine = None
+                st.session_state.active_fault_machine = None
+                st.rerun()
+    else:
+        # Comparison columns
+        comp_col1, comp_col2 = st.columns(2)
+        with comp_col1:
+            st.markdown(
+                f"""
+                <div class="option-card option-a-card" style="padding: 14px 16px;">
+                    <div class="option-header" style="color: #059669; font-size: 1.05rem; margin-bottom: 8px;">
+                        <span>Option A: Planned Micro-Stop</span>
+                        <span class="status-pill status-pill-green">Recommended</span>
+                    </div>
+                    <div class="cost-row" style="font-size: 0.84rem; padding: 4px 0;">
+                        <span class="cost-label">⏱ Duration:</span>
+                        <span class="cost-value" style="color: #059669;">{opt_a_mins:.0f} mins</span>
+                    </div>
+                    <div class="cost-row" style="font-size: 0.84rem; padding: 4px 0;">
+                        <span class="cost-label">📦 Wear Part ({opt_a_part_desc}):</span>
+                        <span class="cost-value">PKR {opt_a_part_cost:,.0f}</span>
+                    </div>
+                    <div class="cost-row" style="font-size: 0.84rem; padding: 4px 0;">
+                        <span class="cost-label">🔧 Technician Labor:</span>
+                        <span class="cost-value">PKR {opt_a_labor:,.0f}</span>
+                    </div>
+                    <div class="cost-row" style="font-size: 0.84rem; padding: 4px 0;">
+                        <span class="cost-label">📉 Production Loss:</span>
+                        <span class="cost-value">PKR {opt_a_lost_prod:,.0f}</span>
+                    </div>
+                    <div class="total-cost-box total-cost-box-a" style="margin-top: 10px; padding: 8px 12px;">
+                        <div class="total-cost-label" style="color: #047857; font-size: 0.72rem;">Total Planned Spend</div>
+                        <div class="total-cost-value" style="color: #059669; font-size: 1.35rem;">PKR {opt_a_total:,.0f}</div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        with comp_col2:
+            st.markdown(
+                f"""
+                <div class="option-card option-b-card" style="padding: 14px 16px;">
+                    <div class="option-header" style="color: #DC2626; font-size: 1.05rem; margin-bottom: 8px;">
+                        <span>Option B: Run to Failure</span>
+                        <span class="status-pill status-pill-red">Catastrophic</span>
+                    </div>
+                    <div class="cost-row" style="font-size: 0.84rem; padding: 4px 0;">
+                        <span class="cost-label">💥 Breakdown Downtime:</span>
+                        <span class="cost-value" style="color: #DC2626;">{opt_b_mins:.0f} mins ({(opt_b_mins/60.0):.1f} hrs)</span>
+                    </div>
+                    <div class="cost-row" style="font-size: 0.84rem; padding: 4px 0;">
+                        <span class="cost-label">⚙️ Replacement ({opt_b_part_desc}):</span>
+                        <span class="cost-value">PKR {opt_b_part_cost:,.0f}</span>
+                    </div>
+                    <div class="cost-row" style="font-size: 0.84rem; padding: 4px 0;">
+                        <span class="cost-label">🚨 Emergency Tech + Freight:</span>
+                        <span class="cost-value">PKR {opt_b_emerg_tech + opt_b_freight:,.0f}</span>
+                    </div>
+                    <div class="cost-row" style="font-size: 0.84rem; padding: 4px 0;">
+                        <span class="cost-label">👥 Idle Labor & Scrap Waste:</span>
+                        <span class="cost-value">PKR {opt_b_idle_labor + opt_b_scrap_cost:,.0f}</span>
+                    </div>
+                    <div class="total-cost-box total-cost-box-b" style="margin-top: 10px; padding: 8px 12px;">
+                        <div class="total-cost-label" style="color: #991B1B; font-size: 0.72rem;">Total Catastrophic Exposure</div>
+                        <div class="total-cost-value" style="color: #DC2626; font-size: 1.35rem;">PKR {opt_b_total:,.0f}</div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        st.markdown(
+            f"""
+            <div style="background: #F0FDF4; border: 1.5px solid #10B981; border-radius: 8px; padding: 10px 16px; margin: 12px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <span style="font-weight: 700; color: #065F46; font-size: 0.95rem;">💡 Decision Justification:</span>
+                    <span style="color: #047857; font-size: 0.86rem; margin-left: 6px;">Investing {opt_a_mins:.0f}m planned stop saves <b>{opt_b_mins:.0f}m catastrophic breakdown</b></span>
+                </div>
+                <div style="font-weight: 800; font-size: 1.15rem; color: #059669;">
+                    +PKR {net_val:,.0f} Net Saved &nbsp;|&nbsp; +{hours_saved:.1f} hrs Rescued
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        act_col1, act_col2 = st.columns([2, 1])
+        with act_col1:
+            if st.button(f"✅ Accept Option A: Fix Now (PKR {opt_a_total:,.0f}) & Resume Process", key=f"btn_exec_opt_a_{machine_id}", type="primary", use_container_width=True):
+                new_event = {
+                    "Event_Date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                    "Month_Key": "2026-09",
+                    "Machine_ID": machine_id,
+                    "Error_ID": curr_err["Error_ID"],
+                    "Stage": meta["Stage"],
+                    "Failure_Category": curr_err.get("Failure_Category", "Mechanical"),
+                    "Failure_Mode": curr_err["Failure_Mode"],
+                    "Reported_By": meta["Operator_Assignment"].split("(")[0].strip(),
+                    "Shift": "A",
+                    "Decision": "Accept Option A",
+                    "Safety_Override": "No",
+                    "Planned_Stop_Min": opt_a_mins,
+                    "Unplanned_Downtime_Min": opt_b_mins,
+                    "OptionA_Total_PKR": opt_a_total,
+                    "OptionB_Total_PKR": opt_b_total,
+                    "Net_Avoided_Loss_PKR": net_val,
+                    "Production_Hours_Rescued": hours_saved,
+                    "Notes": f"Preventative stop approved: Saved PKR {net_val:,.0f} and {hours_saved:.1f} hrs.",
+                }
+                st.session_state.history_log.insert(0, new_event)
+                st.session_state.kpi_totals["net_loss_avoided"] += net_val
+                st.session_state.kpi_totals["hours_rescued"] += hours_saved
+                st.session_state.kpi_totals["stops_approved"] += 1
+                st.session_state.monthly_summary["2026-09"]["planned"] += opt_a_total
+                st.session_state.monthly_summary["2026-09"]["exposure"] += opt_b_total
+                st.session_state.monthly_summary["2026-09"]["net"] += net_val
+                st.session_state.monthly_summary["2026-09"]["hours"] += hours_saved
+
+                # RESUME FULL PLANT OPERATIONS AND DISMISS PANEL
+                st.session_state.active_fault_machine = None
+                st.session_state.inspecting_machine = None
+                st.toast(f"🎉 Process resumed: {machine_id} repaired! All machines operating normally.", icon="🟢")
+                st.rerun()
+
+        with act_col2:
+            if st.button("✖ Close / Cancel", key=f"btn_cancel_opt_{machine_id}", use_container_width=True):
+                st.session_state.inspecting_machine = None
+                st.session_state.active_fault_machine = None
+                st.rerun()
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # SCREEN 1: EXECUTIVE DASHBOARD (HIGH-LEVEL DETAILS ONLY)
@@ -1724,15 +1963,6 @@ if st.session_state.current_screen == "dashboard":
     """,
         unsafe_allow_html=True,
     )
-
-    if st.session_state.last_rectified:
-        st.markdown(
-            f'<div style="background: #ECFDF5; border: 1.5px solid #10B981; border-radius: 8px; padding: 12px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">'
-            f'<div><span style="font-weight: 700; color: #059669; font-size: 0.98rem;">🎉 Recent Rectification Executed: {st.session_state.last_rectified} Resumed!</span>'
-            f'<div style="color: #047857; font-size: 0.82rem; margin-top: 2px;">Option A preventative micro-stoppage performed. Net capital saved: PKR {st.session_state.last_rectified_savings:,.0f}. Full factory flow restored to 100 pkts/hr.</div></div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
 
     # 4 Top KPI Cards
     col_kpi1, col_kpi2, col_kpi3, col_kpi4 = st.columns(4)
@@ -1795,7 +2025,7 @@ if st.session_state.current_screen == "dashboard":
                     <span>⚖️</span> <span>Real-Time Maintenance Decision Evaluation Engine</span>
                 </div>
                 <div style="color: #475569; font-size: 0.88rem; margin-top: 4px;">
-                    Inspect machinery anomalies, assess throughput bottlenecks, and evaluate <b>Option A (Planned Stop)</b> vs. <b>Option B (Run to Fail)</b> financial economics.
+                    Inspect machinery anomalies, assess bottlenecks, and evaluate <b>Option A (Planned Stop)</b> vs. <b>Option B (Run to Fail)</b> financial economics.
                 </div>
             </div>
         </div>
@@ -1910,8 +2140,6 @@ if st.session_state.current_screen == "dashboard":
 
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
-
-
 # -----------------------------------------------------------------------------
 # SCREEN 2: EVALUATION MODE SELECTOR
 # -----------------------------------------------------------------------------
@@ -1946,11 +2174,11 @@ elif st.session_state.current_screen == "mode_select":
                 <div class="mode-card-icon">🏭</div>
                 <div class="mode-card-title">Graphical Factory Topology</div>
                 <div class="mode-card-desc">
-                    Interactive <b>1 ➔ 2 ➔ 4 visual equipment layout</b> with live animated conveyor pipelines, equipment photographs, and dynamic trip/starvation propagation across all 7 work centers.
+                    Interactive <b>1 ➔ 2 ➔ 4 visual equipment layout</b> with live animated conveyor pipelines, equipment photographs, and dynamic starvation tracking across all 7 work centers.
                 </div>
                 <div style="margin-bottom: 18px; font-size: 0.84rem; color: #475569; line-height: 1.6;">
                     <div>✔ Real-time animated conveyor pipelines</div>
-                    <div>✔ Visual 1 ➔ 2 ➔ 4 flow & starvation tree</div>
+                    <div>✔ Visual 1 ➔ 2 ➔ 4 flow layout</div>
                     <div>✔ Direct machine click-to-diagnose triggers</div>
                 </div>
             </div>
@@ -2001,100 +2229,59 @@ elif st.session_state.current_screen == "evaluation":
             st.session_state.eval_mode = "dropdown" if st.session_state.eval_mode == "topology" else "topology"
             st.rerun()
 
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
     # 2. RENDER SELECTED EVALUATION MODE
     if st.session_state.eval_mode == "topology":
-        st.markdown(
-            """<div class="section-card">
-<div class="section-title">
-<span>🏭 Interactive 1 ➔ 2 ➔ 4 Factory Topology with Animated Conveyor Pipelines</span>
-<span style="font-size: 0.8rem; font-weight: 400; color: #64748B; margin-left: auto;">
-Operational flow animation reflects real-time machine trip &amp; starvation states
-</span>
-</div>""",
-            unsafe_allow_html=True,
-        )
+        # STAGE 1: HYDRAULIC PRESS (STAGE 1)
+        st.markdown('<div class="topo-stage-header">Stage 1: Primary Forming Press</div>', unsafe_allow_html=True)
 
-        # Operational status & recovery button
-        col_topo_hdr1, col_topo_hdr2 = st.columns([3.2, 1.2])
-        with col_topo_hdr1:
-            if st.session_state.active_fault_machine is None:
+        m101_fault = (st.session_state.active_fault_machine == "M-101")
+        m101_inspected = (st.session_state.inspecting_machine == "M-101")
+        m101_class = "topo-node topo-node-halted" if m101_fault else ("topo-node topo-node-active" if m101_inspected else "topo-node")
+        m101_meta = get_machine_meta("M-101")
+        m101_img_b64 = get_image_base64(MACHINE_IMAGES.get("M-101"))
+        m101_img_tag = f'<div class="machine-img-box"><img src="data:image/jpeg;base64,{m101_img_b64}" class="machine-img" style="height: 160px;"></div>' if m101_img_b64 else ""
+
+        if m101_inspected:
+            # Inline side-by-side: Machine Card on Left, Decision Station on Right
+            m1_layout = st.columns([1.1, 2.2])
+            with m1_layout[0]:
                 st.markdown(
-                    '<div style="background: #ECFDF5; border: 1px solid #10B981; border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 10px;">'
-                    '<span style="font-size: 1.2rem;">🟢</span>'
-                    '<div><span style="font-weight: 700; color: #059669; font-size: 0.92rem;">All 7 Work Centers Operating Normally (100 pkts/hr)</span>'
-                    '<div style="color: #475569; font-size: 0.78rem;">Click "⚡ Trigger / Inspect Fault" on any asset below to simulate failure modes and evaluate financial decision intelligence.</div></div>'
-                    '</div>',
-                    unsafe_allow_html=True,
-                )
-            else:
-                st.markdown(
-                    f'<div style="background: #FEF2F2; border: 1px solid #EF4444; border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 10px;">'
-                    f'<span style="font-size: 1.2rem;">⛔</span>'
-                    f'<div><span style="font-weight: 700; color: #DC2626; font-size: 0.92rem;">Active Stoppage Simulated on {st.session_state.active_fault_machine} — Downstream Lines Starved</span>'
-                    f'<div style="color: #475569; font-size: 0.78rem;">Review Option A vs Option B decision below, or click Resume to restore full throughput.</div></div>'
+                    f'<div class="{m101_class}">'
+                    f'<div class="topo-node-title">'
+                    f'<span>M-101 · {m101_meta["Machine_Type"]}</span>'
+                    f'<span class="status-pill {topo_state["M-101"]["pill"]}">{topo_state["M-101"]["text"]}</span>'
+                    f'</div>'
+                    f'{m101_img_tag}'
+                    f'<div class="topo-node-meta">👤 {m101_meta["Operator_Assignment"].split(";")[0]}</div>'
                     f'</div>',
                     unsafe_allow_html=True,
                 )
-        with col_topo_hdr2:
-            if st.button("▶️ Resume Normal Operation", key="btn_reset_all_topo", use_container_width=True):
-                st.session_state.active_fault_machine = None
-                st.session_state.last_rectified = None
-                st.rerun()
-
-        if st.session_state.last_rectified:
-            st.markdown(
-                f'<div style="background: #ECFDF5; border: 1.5px solid #10B981; border-radius: 8px; padding: 12px 18px; margin: 12px 0; display: flex; align-items: center; justify-content: space-between;">'
-                f'<div><span style="font-weight: 700; color: #059669; font-size: 0.98rem;">🎉 Rectification Successfully Executed: {st.session_state.last_rectified} Resumed!</span>'
-                f'<div style="color: #047857; font-size: 0.82rem; margin-top: 2px;">Option A preventative micro-stoppage performed. Net capital saved: PKR {st.session_state.last_rectified_savings:,.0f}. Conveyor pipeline flow restored to 100 pkts/hr.</div></div>'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
-
-        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-
-        # STAGE 1: HYDRAULIC PRESS (CENTER)
-        st.markdown(
-            f'<div class="topo-stage-header">Stage 1: Primary Forming Feeder (100% Plant Trip Point) &nbsp;|&nbsp; Flow: {topo_state["M-101"]["rate"]} pkts/hr</div>',
-            unsafe_allow_html=True,
-        )
-
-        m1_cols = st.columns([1.4, 3.2, 1.4])
-        with m1_cols[1]:
-            m101_fault = (st.session_state.active_fault_machine == "M-101")
-            m101_class = "topo-node topo-node-halted" if m101_fault else ("topo-node topo-node-active" if st.session_state.selected_machine == "M-101" else "topo-node")
-            m101_meta = get_machine_meta("M-101")
-            m101_img_b64 = get_image_base64(MACHINE_IMAGES.get("M-101"))
-            m101_img_tag = (
-                f'<div class="machine-img-box"><img src="data:image/jpeg;base64,{m101_img_b64}" class="machine-img" style="height: 180px;"></div>'
-                if m101_img_b64
-                else ""
-            )
-
-            st.markdown(
-                f'<div class="{m101_class}">'
-                f'<div class="topo-node-title">'
-                f'<span>M-101 · {m101_meta["Machine_Type"]}</span>'
-                f'<span class="status-pill {topo_state["M-101"]["pill"]}">{topo_state["M-101"]["text"]}</span>'
-                f'</div>'
-                f'{m101_img_tag}'
-                f'<div class="topo-node-desc"><b>Rate:</b> {topo_state["M-101"]["rate"]} pkts/hr | <b>Loss Impact:</b> PKR 180,000/hr (100% Loss If Tripped)</div>'
-                f'<div class="topo-node-meta">👤 Operators: {m101_meta["Operator_Assignment"]}</div>'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
-            if m101_fault:
-                if st.button("⛔ Active Anomaly on M-101 (Review Decision)", key="btn_m101", type="primary", use_container_width=True):
-                    st.session_state.selected_machine = "M-101"
-                    st.rerun()
-            else:
-                if st.button("⚡ Trigger / Inspect Fault on M-101", key="btn_m101", use_container_width=True):
+                if st.button("🔍 Active Inspection", key="btn_m101_act", type="primary", use_container_width=True):
+                    pass
+            with m1_layout[1]:
+                render_spot_decision_panel("M-101")
+        else:
+            m1_cols = st.columns([1.5, 2.5, 1.5])
+            with m1_cols[1]:
+                st.markdown(
+                    f'<div class="{m101_class}">'
+                    f'<div class="topo-node-title">'
+                    f'<span>M-101 · {m101_meta["Machine_Type"]}</span>'
+                    f'<span class="status-pill {topo_state["M-101"]["pill"]}">{topo_state["M-101"]["text"]}</span>'
+                    f'</div>'
+                    f'{m101_img_tag}'
+                    f'<div class="topo-node-meta">👤 {m101_meta["Operator_Assignment"].split(";")[0]}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+                if st.button("⚡ Inspect Faults on M-101", key="btn_m101", use_container_width=True):
+                    st.session_state.inspecting_machine = "M-101"
                     st.session_state.active_fault_machine = "M-101"
                     st.session_state.selected_machine = "M-101"
                     m_errs = get_machine_errors("M-101")
                     st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
-                    st.session_state.last_rectified = None
                     st.rerun()
 
         # ANIMATED CONVEYOR SPLIT 1 -> 2 (SVG)
@@ -2119,24 +2306,18 @@ Operational flow animation reflects real-time machine trip &amp; starvation stat
         )
 
         # STAGE 2: CNC MILLS (2 COLUMNS)
-        st.markdown(
-            f'<div class="topo-stage-header">Stage 2: High-Speed Milling Split (Parallel 50% Streams) &nbsp;|&nbsp; Combined: {topo_state["M-201"]["rate"] + topo_state["M-202"]["rate"]} pkts/hr</div>',
-            unsafe_allow_html=True,
-        )
+        st.markdown('<div class="topo-stage-header">Stage 2: High-Speed CNC Milling Centers</div>', unsafe_allow_html=True)
         m2_cols = st.columns(2)
 
         # M-201
         with m2_cols[0]:
             m201_fault = (st.session_state.active_fault_machine == "M-201")
+            m201_inspected = (st.session_state.inspecting_machine == "M-201")
             is_starved_201 = (topo_state["M-201"]["status"] == "STARVED")
-            m201_class = "topo-node topo-node-halted" if m201_fault else ("topo-node topo-node-active" if is_starved_201 else "topo-node")
+            m201_class = "topo-node topo-node-halted" if m201_fault else ("topo-node topo-node-active" if (is_starved_201 or m201_inspected) else "topo-node")
             m201_meta = get_machine_meta("M-201")
             m201_img_b64 = get_image_base64(MACHINE_IMAGES.get("M-201"))
-            m201_img_tag = (
-                f'<div class="machine-img-box"><img src="data:image/jpeg;base64,{m201_img_b64}" class="machine-img" style="height: 140px;"></div>'
-                if m201_img_b64
-                else ""
-            )
+            m201_img_tag = f'<div class="machine-img-box"><img src="data:image/jpeg;base64,{m201_img_b64}" class="machine-img" style="height: 140px;"></div>' if m201_img_b64 else ""
 
             st.markdown(
                 f'<div class="{m201_class}">'
@@ -2145,36 +2326,31 @@ Operational flow animation reflects real-time machine trip &amp; starvation stat
                 f'<span class="status-pill {topo_state["M-201"]["pill"]}">{topo_state["M-201"]["text"]}</span>'
                 f'</div>'
                 f'{m201_img_tag}'
-                f'<div class="topo-node-desc"><b>Rate:</b> {topo_state["M-201"]["rate"]} pkts/hr | <b>Loss Impact:</b> PKR 120,000/hr (Feeds Cells M-301 & M-302)</div>'
-                f'<div class="topo-node-meta">👤 Operator: {m201_meta["Operator_Assignment"]}</div>'
+                f'<div class="topo-node-meta">👤 {m201_meta["Operator_Assignment"].split(";")[0]}</div>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
-            if m201_fault:
-                if st.button("⛔ Active Anomaly on M-201 (Review Decision)", key="btn_m201", type="primary", use_container_width=True):
-                    st.session_state.selected_machine = "M-201"
-                    st.rerun()
+            if m201_inspected:
+                if st.button("🔍 Active Inspection", key="btn_m201_act", type="primary", use_container_width=True):
+                    pass
             else:
-                if st.button("⚡ Trigger / Inspect Fault on M-201", key="btn_m201", use_container_width=True):
+                if st.button("⚡ Inspect Faults on M-201", key="btn_m201", use_container_width=True):
+                    st.session_state.inspecting_machine = "M-201"
                     st.session_state.active_fault_machine = "M-201"
                     st.session_state.selected_machine = "M-201"
                     m_errs = get_machine_errors("M-201")
                     st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
-                    st.session_state.last_rectified = None
                     st.rerun()
 
         # M-202
         with m2_cols[1]:
             m202_fault = (st.session_state.active_fault_machine == "M-202")
+            m202_inspected = (st.session_state.inspecting_machine == "M-202")
             is_starved_202 = (topo_state["M-202"]["status"] == "STARVED")
-            m202_class = "topo-node topo-node-halted" if m202_fault else ("topo-node topo-node-active" if is_starved_202 else "topo-node")
+            m202_class = "topo-node topo-node-halted" if m202_fault else ("topo-node topo-node-active" if (is_starved_202 or m202_inspected) else "topo-node")
             m202_meta = get_machine_meta("M-202")
             m202_img_b64 = get_image_base64(MACHINE_IMAGES.get("M-202"))
-            m202_img_tag = (
-                f'<div class="machine-img-box"><img src="data:image/jpeg;base64,{m202_img_b64}" class="machine-img" style="height: 140px;"></div>'
-                if m202_img_b64
-                else ""
-            )
+            m202_img_tag = f'<div class="machine-img-box"><img src="data:image/jpeg;base64,{m202_img_b64}" class="machine-img" style="height: 140px;"></div>' if m202_img_b64 else ""
 
             st.markdown(
                 f'<div class="{m202_class}">'
@@ -2183,23 +2359,25 @@ Operational flow animation reflects real-time machine trip &amp; starvation stat
                 f'<span class="status-pill {topo_state["M-202"]["pill"]}">{topo_state["M-202"]["text"]}</span>'
                 f'</div>'
                 f'{m202_img_tag}'
-                f'<div class="topo-node-desc"><b>Rate:</b> {topo_state["M-202"]["rate"]} pkts/hr | <b>Loss Impact:</b> PKR 120,000/hr (Feeds Cells M-303 & M-304)</div>'
-                f'<div class="topo-node-meta">👤 Operator: {m202_meta["Operator_Assignment"]}</div>'
+                f'<div class="topo-node-meta">👤 {m202_meta["Operator_Assignment"].split(";")[0]}</div>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
-            if m202_fault:
-                if st.button("⛔ Active Anomaly on M-202 (Review Decision)", key="btn_m202", type="primary", use_container_width=True):
-                    st.session_state.selected_machine = "M-202"
-                    st.rerun()
+            if m202_inspected:
+                if st.button("🔍 Active Inspection", key="btn_m202_act", type="primary", use_container_width=True):
+                    pass
             else:
-                if st.button("⚡ Trigger / Inspect Fault on M-202", key="btn_m202", use_container_width=True):
+                if st.button("⚡ Inspect Faults on M-202", key="btn_m202", use_container_width=True):
+                    st.session_state.inspecting_machine = "M-202"
                     st.session_state.active_fault_machine = "M-202"
                     st.session_state.selected_machine = "M-202"
                     m_errs = get_machine_errors("M-202")
                     st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
-                    st.session_state.last_rectified = None
                     st.rerun()
+
+        # If inspecting M-201 or M-202, show spot panel right below Stage 2
+        if st.session_state.inspecting_machine in ["M-201", "M-202"]:
+            render_spot_decision_panel(st.session_state.inspecting_machine)
 
         # ANIMATED CONVEYOR SPLIT 2 -> 4 (SVG)
         p201_301 = topo_state["pipes"]["m201_to_m301"]
@@ -2232,25 +2410,19 @@ Operational flow animation reflects real-time machine trip &amp; starvation stat
         )
 
         # STAGE 3: PACKAGING CELLS (4 COLUMNS)
-        st.markdown(
-            f'<div class="topo-stage-header">Stage 3: Automated Packaging Quad Cells (25% Split per Station) &nbsp;|&nbsp; Combined: {sum(topo_state[m]["rate"] for m in ["M-301", "M-302", "M-303", "M-304"])} pkts/hr</div>',
-            unsafe_allow_html=True,
-        )
+        st.markdown('<div class="topo-stage-header">Stage 3: Automated Packaging Quad Cells</div>', unsafe_allow_html=True)
         m3_cols = st.columns(4)
 
         pkg_machines = ["M-301", "M-302", "M-303", "M-304"]
         for i, m_id in enumerate(pkg_machines):
             with m3_cols[i]:
                 m_fault = (st.session_state.active_fault_machine == m_id)
+                m_inspected = (st.session_state.inspecting_machine == m_id)
                 is_starved_pkg = (topo_state[m_id]["status"] == "STARVED")
-                m_class = "topo-node topo-node-halted" if m_fault else ("topo-node topo-node-active" if is_starved_pkg else "topo-node")
+                m_class = "topo-node topo-node-halted" if m_fault else ("topo-node topo-node-active" if (is_starved_pkg or m_inspected) else "topo-node")
                 m_meta = get_machine_meta(m_id)
                 pkg_img_b64 = get_image_base64(MACHINE_IMAGES.get(m_id))
-                pkg_img_tag = (
-                    f'<div class="machine-img-box"><img src="data:image/jpeg;base64,{pkg_img_b64}" class="machine-img" style="height: 100px;"></div>'
-                    if pkg_img_b64
-                    else ""
-                )
+                pkg_img_tag = f'<div class="machine-img-box"><img src="data:image/jpeg;base64,{pkg_img_b64}" class="machine-img" style="height: 100px;"></div>' if pkg_img_b64 else ""
 
                 st.markdown(
                     f'<div class="{m_class}">'
@@ -2259,25 +2431,25 @@ Operational flow animation reflects real-time machine trip &amp; starvation stat
                     f'<span class="status-pill {topo_state[m_id]["pill"]}">{topo_state[m_id]["text"]}</span>'
                     f'</div>'
                     f'{pkg_img_tag}'
-                    f'<div class="topo-node-desc" style="font-size: 0.76rem;"><b>Cap:</b> {topo_state[m_id]["rate"]} pkts/hr | <b>Loss:</b> PKR 45k/hr</div>'
                     f'<div class="topo-node-meta" style="font-size: 0.72rem;">👤 {m_meta["Operator_Assignment"].split(";")[0]}</div>'
                     f'</div>',
                     unsafe_allow_html=True,
                 )
-                if m_fault:
-                    if st.button(f"⛔ Active on {m_id}", key=f"btn_{m_id}", type="primary", use_container_width=True):
-                        st.session_state.selected_machine = m_id
-                        st.rerun()
+                if m_inspected:
+                    if st.button("🔍 Active", key=f"btn_{m_id}_act", type="primary", use_container_width=True):
+                        pass
                 else:
                     if st.button(f"⚡ Inspect {m_id}", key=f"btn_{m_id}", use_container_width=True):
+                        st.session_state.inspecting_machine = m_id
                         st.session_state.active_fault_machine = m_id
                         st.session_state.selected_machine = m_id
                         m_errs = get_machine_errors(m_id)
                         st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
-                        st.session_state.last_rectified = None
                         st.rerun()
 
-        st.markdown("</div>", unsafe_allow_html=True)
+        # If inspecting any packaging cell, show spot panel right below Stage 3
+        if st.session_state.inspecting_machine in pkg_machines:
+            render_spot_decision_panel(st.session_state.inspecting_machine)
 
     # MODE 2: DROPDOWN / MANUAL REGISTRY ENTRY
     else:
@@ -2302,6 +2474,7 @@ Operational flow animation reflects real-time machine trip &amp; starvation stat
             )
             if new_m != st.session_state.selected_machine:
                 st.session_state.selected_machine = new_m
+                st.session_state.active_fault_machine = new_m
                 m_errs = get_machine_errors(new_m)
                 st.session_state.selected_error_id = m_errs.iloc[0]["Error_ID"]
                 st.rerun()
@@ -2324,420 +2497,20 @@ Operational flow animation reflects real-time machine trip &amp; starvation stat
             chosen_err_id = err_options[err_labels.index(selected_label)]
             if chosen_err_id != st.session_state.selected_error_id:
                 st.session_state.selected_error_id = chosen_err_id
+                st.session_state.active_fault_machine = st.session_state.selected_machine
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
+        render_spot_decision_panel(st.session_state.selected_machine)
 
-    # 3. ACTIVE FAULT LIBRARY SELECTOR (HORIZONTAL PILL ROW)
-    curr_machine_id = st.session_state.selected_machine
-    machine_meta = get_machine_meta(curr_machine_id)
-    avail_errors = get_machine_errors(curr_machine_id)
-
-    st.markdown(
-        f"""
-    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-        <div style="font-size: 0.88rem; font-weight: 700; color: #0284C7; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
-            Active Fault Library for {curr_machine_id} ({machine_meta['Machine_Type']}):
-        </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-    err_cols = st.columns(len(avail_errors))
-    for idx, (_, e_row) in enumerate(avail_errors.iterrows()):
-        e_id = e_row["Error_ID"]
-        is_selected = (e_id == st.session_state.selected_error_id)
-        btn_label = f"⚡ {e_id}: {e_row['Failure_Mode']}"
-        if e_row["Safety_Critical"]:
-            btn_label = f"🛑 {e_id}: {e_row['Failure_Mode']} (SAFETY)"
-        with err_cols[idx]:
-            if st.button(
-                btn_label,
-                key=f"pill_err_{e_id}",
-                type="primary" if is_selected else "secondary",
-                use_container_width=True,
-            ):
-                st.session_state.selected_error_id = e_id
-                st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # Retrieve currently active error record
-    active_error_match = errors_df[errors_df["Error_ID"] == st.session_state.selected_error_id]
-    if active_error_match.empty:
-        active_error = avail_errors.iloc[0].to_dict()
-    else:
-        active_error = active_error_match.iloc[0].to_dict()
-
-    # 4. DIAGNOSTIC & FINANCIAL DECISION GATEKEEPER
-    st.markdown(
-        """
-    <div class="section-card">
-        <div class="section-title">
-            <span>⚖️ Diagnostic & Financial Decision Gatekeeper</span>
-            <span style="font-size: 0.82rem; font-weight: 400; color: #64748B; margin-left: auto;">
-                Deterministic calculations evaluated strictly outside the LLM
-            </span>
-        </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-    is_safety = bool(active_error.get("Safety_Critical", False))
-    badge_color = "status-pill-red" if is_safety else "status-pill-amber"
-    badge_text = "SAFETY CRITICAL LOCKOUT" if is_safety else f"{active_error.get('Failure_Category', 'Mechanical').upper()} INTERVENTION REQUIRED"
-
-    curr_img_b64 = get_image_base64(MACHINE_IMAGES.get(curr_machine_id))
-    diag_thumb_tag = (
-        f'<img src="data:image/jpeg;base64,{curr_img_b64}" style="width: 170px; height: 95px; object-fit: cover; border-radius: 6px; border: 1.5px solid #0284C7; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">'
-        if curr_img_b64
-        else ""
-    )
-
-    st.markdown(
-        f"""
-    <div class="diagnostic-header">
-        <div>
-            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <div class="diag-title">
-                    Asset: <span style="color: #0284C7; font-weight: 700;">{curr_machine_id} · {machine_meta['Machine_Type']}</span>
-                    &nbsp;|&nbsp; Fault Code: <span style="color: #D97706; font-weight: 700;">{active_error['Error_ID']}</span>
-                    &nbsp;|&nbsp; <span style="color: #0F172A; font-weight: 700;">{active_error['Failure_Mode']}</span>
-                </div>
-                <div>
-                    <span class="status-pill {badge_color}">{badge_text}</span>
-                </div>
-            </div>
-            <div class="diag-meta">
-                <b>Observed Symptom:</b> <i>"{active_error.get('Symptom', 'Degradation detected')}"</i><br>
-                <b>Assigned Shift Operators:</b> {machine_meta['Operator_Assignment']} &nbsp;|&nbsp;
-                <b>Line Loss Rate:</b> PKR {machine_meta['Line_Loss_Rate_PKR_hr']:,.0f}/hr ({machine_meta['Throughput_Loss_if_Trip_pct']}% capacity loss)
-            </div>
-        </div>
-        <div>
-            {diag_thumb_tag}
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-    # HARD SAFETY LOCKOUT BANNER
-    if is_safety:
-        st.markdown(
-            f"""
-        <div class="safety-alert-banner">
-            <div class="safety-alert-title">
-                <span>🛑 MANDATORY SAFETY OVERRIDE: STATUTORY SHUTDOWN ENFORCED</span>
-            </div>
-            <div class="safety-alert-body">
-                <b>Statutory Code Violation (OSHA 1910.212 / IEC 62061 SIL-2/3):</b><br>
-                {active_error.get('Safety_Message', 'Operating with compromised safety circuitry or disabled interlocks violates statutory machinery safety regulations.')}<br>
-                <div style="margin-top: 8px; font-weight: 700; color: #991B1B;">
-                    🔒 OPTION B (RUN-TO-FAILURE) IS STATUTORILY LOCKED OUT. Economic deferral is strictly prohibited under industrial compliance codes.
-                </div>
-            </div>
-        </div>
-        """,
-            unsafe_allow_html=True,
-        )
-
-    col_opt_a, col_opt_b = st.columns(2)
-
-    # LEFT COLUMN: OPTION A (INTERVENE NOW)
-    with col_opt_a:
-        opt_a_mins = float(active_error.get("Planned_Downtime_min", 10))
-        opt_a_lost_prod = float(active_error.get("Planned_Production_Loss_PKR", (opt_a_mins / 60.0) * machine_meta["Line_Loss_Rate_PKR_hr"]))
-        opt_a_labor = float(active_error.get("OptionA_Labor_Cost_PKR", 2500))
-        opt_a_part_cost = float(active_error.get("OptionA_Part_Cost_PKR", 5000))
-        opt_a_part_desc = active_error.get("OptionA_Part_Description", "Consumable / Wear Part")
-        opt_a_total = float(active_error.get("OptionA_Total_PKR", opt_a_lost_prod + opt_a_labor + opt_a_part_cost))
-
-        st.markdown(
-            f"""
-        <div class="option-card option-a-card">
-            <div class="option-header" style="color: #059669;">
-                <span>Option A: Intervene Now</span>
-                <span class="status-pill status-pill-green">Planned Preventative Stop</span>
-            </div>
-            <div class="cost-row">
-                <span class="cost-label">⏱ Planned Stoppage Duration:</span>
-                <span class="cost-value" style="color: #059669; font-weight: 700;">{opt_a_mins:.0f} mins ({(opt_a_mins/60.0):.2f} hrs)</span>
-            </div>
-            <div class="cost-row">
-                <span class="cost-label">📉 Lost Production Capacity Cost:</span>
-                <span class="cost-value">PKR {opt_a_lost_prod:,.0f}</span>
-            </div>
-            <div class="cost-row">
-                <span class="cost-label">🔧 Standard Technician Labor:</span>
-                <span class="cost-value">PKR {opt_a_labor:,.0f}</span>
-            </div>
-            <div class="cost-row">
-                <span class="cost-label">📦 Wear Part ({opt_a_part_desc}):</span>
-                <span class="cost-value">PKR {opt_a_part_cost:,.0f}</span>
-            </div>
-            <div class="cost-row" style="color: #64748B;">
-                <span class="cost-label">🚫 Idle Standby Labor Surcharge:</span>
-                <span class="cost-value">PKR 0 (Absorbed in Shift)</span>
-            </div>
-            <div class="cost-row" style="color: #64748B;">
-                <span class="cost-label">🚫 Expedited Freight / Scrap Waste:</span>
-                <span class="cost-value">PKR 0 (Zero Scrap)</span>
-            </div>
-            <div class="total-cost-box total-cost-box-a">
-                <div class="total-cost-label" style="color: #047857;">Total Planned Intervention Spend</div>
-                <div class="total-cost-value" style="color: #059669;">PKR {opt_a_total:,.0f}</div>
-            </div>
-        </div>
-        """,
-            unsafe_allow_html=True,
-        )
-
-    # RIGHT COLUMN: OPTION B (RUN TO FAIL)
-    with col_opt_b:
-        if is_safety:
-            st.markdown(
-                f"""
-            <div class="option-card option-b-card option-b-locked">
-                <div class="option-header" style="color: #64748B;">
-                    <span>Option B: Run to Fail / Defer</span>
-                    <span class="status-pill status-pill-red">LOCKED OUT</span>
-                </div>
-                <div style="text-align: center; padding: 40px 10px;">
-                    <div style="font-size: 3.5rem; margin-bottom: 10px;">🔒</div>
-                    <div style="font-size: 1.2rem; font-weight: 700; color: #DC2626;">
-                        STATUTORY SAFETY LOCKOUT
-                    </div>
-                    <p style="color: #64748B; font-size: 0.9rem; margin-top: 8px;">
-                        Running with this fault violates ISO 13849-1 and statutory safety law.<br>
-                        Cost modeling is disabled because this action is legally prohibited.
-                    </p>
-                </div>
-                <div class="total-cost-box" style="background: #F8FAFC; border: 1px solid #CBD5E1;">
-                    <div class="total-cost-label" style="color: #64748B;">Option B Financial Exposure</div>
-                    <div class="total-cost-value" style="color: #DC2626;">PROHIBITED</div>
-                </div>
-            </div>
-            """,
-                unsafe_allow_html=True,
-            )
-        else:
-            opt_b_mins = float(active_error.get("Unplanned_Downtime_min", 120))
-            opt_b_lost_prod = float(active_error.get("Unplanned_Production_Loss_PKR", (opt_b_mins / 60.0) * machine_meta["Line_Loss_Rate_PKR_hr"]))
-            opt_b_idle_labor = float(active_error.get("OptionB_Idle_Operator_Cost_PKR", 12000))
-            opt_b_emerg_tech = float(active_error.get("OptionB_Emergency_Tech_Cost_PKR", 25000))
-            opt_b_part_cost = float(active_error.get("OptionB_Replacement_Cost_PKR", 150000))
-            opt_b_part_desc = active_error.get("OptionB_Replacement_Description", "Complete Core Sub-Assembly")
-            opt_b_freight = float(active_error.get("OptionB_Freight_PKR", 25000))
-            opt_b_scrap_cost = float(active_error.get("OptionB_Scrap_Cost_PKR", 20000))
-            opt_b_scrap_desc = active_error.get("OptionB_Scrap_Description", "Part / Tool Scrap")
-            opt_b_total = float(active_error.get("OptionB_Total_PKR", opt_b_lost_prod + opt_b_idle_labor + opt_b_emerg_tech + opt_b_part_cost + opt_b_freight + opt_b_scrap_cost))
-
-            st.markdown(
-                f"""
-            <div class="option-card option-b-card">
-                <div class="option-header" style="color: #DC2626;">
-                    <span>Option B: Run to Fail / Repair Later</span>
-                    <span class="status-pill status-pill-red">Catastrophic Breakdown</span>
-                </div>
-                <div class="cost-row">
-                    <span class="cost-label">💥 Catastrophic Breakdown Downtime:</span>
-                    <span class="cost-value" style="color: #DC2626; font-weight: 700;">{opt_b_mins:.0f} mins ({(opt_b_mins/60.0):.2f} hrs)</span>
-                </div>
-                <div class="cost-row">
-                    <span class="cost-label">📉 Compounded Lost Production:</span>
-                    <span class="cost-value">PKR {opt_b_lost_prod:,.0f}</span>
-                </div>
-                <div class="cost-row">
-                    <span class="cost-label">👥 Idle Downstream Line Labor:</span>
-                    <span class="cost-value">PKR {opt_b_idle_labor:,.0f}</span>
-                </div>
-                <div class="cost-row">
-                    <span class="cost-label">🚨 Emergency Technician Callout:</span>
-                    <span class="cost-value">PKR {opt_b_emerg_tech:,.0f}</span>
-                </div>
-                <div class="cost-row">
-                    <span class="cost-label">⚙️ Replacement ({opt_b_part_desc}):</span>
-                    <span class="cost-value">PKR {opt_b_part_cost:,.0f}</span>
-                </div>
-                <div class="cost-row">
-                    <span class="cost-label">✈️ Express Air Freight Surcharge:</span>
-                    <span class="cost-value">PKR {opt_b_freight:,.0f}</span>
-                </div>
-                <div class="cost-row">
-                    <span class="cost-label">🗑️ Scrap Waste ({opt_b_scrap_desc}):</span>
-                    <span class="cost-value">PKR {opt_b_scrap_cost:,.0f}</span>
-                </div>
-                <div class="total-cost-box total-cost-box-b">
-                    <div class="total-cost-label" style="color: #991B1B;">Total Catastrophic Exposure</div>
-                    <div class="total-cost-value" style="color: #DC2626;">PKR {opt_b_total:,.0f}</div>
-                </div>
-            </div>
-            """,
-                unsafe_allow_html=True,
-            )
-
-    # NET DECISION METRIC BANNER
-    if not is_safety:
-        net_avoided_pkr = opt_b_total - opt_a_total
-        hours_saved = (opt_b_mins - opt_a_mins) / 60.0
-        cost_multiplier = opt_b_total / opt_a_total if opt_a_total > 0 else 0
-
-        st.markdown(
-            f"""
-        <div class="net-decision-banner">
-            <div>
-                <div class="net-banner-title">✅ High-Leverage Intervention Justification</div>
-                <div class="net-banner-sub">
-                    Investing <b>{opt_a_mins:.0f} minutes</b> now prevents <b>{opt_b_mins:.0f} minutes</b> of unplanned factory breakdown.<br>
-                    Catastrophic run-to-fail exposure is <b>{cost_multiplier:.1f}× more expensive</b> than preventative service.
-                </div>
-            </div>
-            <div class="net-banner-metrics">
-                <div>
-                    <div class="net-metric-num">+PKR {net_avoided_pkr:,.0f}</div>
-                    <div class="net-metric-lbl">Net Capital Losses Avoided</div>
-                </div>
-                <div>
-                    <div class="net-metric-num" style="color: #0284C7;">+{hours_saved:.1f} hrs</div>
-                    <div class="net-metric-lbl">Production Uptime Rescued</div>
-                </div>
-            </div>
-        </div>
-        """,
-            unsafe_allow_html=True,
-        )
-
-    # 5. OPERATOR EXECUTION PROTOCOL
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-    st.markdown("### 📋 Operator Execution & Handover Protocol")
-
-    if is_safety:
-        if st.button("🛑 Execute Immediate Safety Stop & Lockout", type="primary", use_container_width=True):
-            new_event = {
-                "Event_Date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                "Month_Key": "2026-09",
-                "Machine_ID": curr_machine_id,
-                "Error_ID": active_error["Error_ID"],
-                "Stage": machine_meta["Stage"],
-                "Failure_Category": "Safety",
-                "Failure_Mode": active_error["Failure_Mode"],
-                "Reported_By": machine_meta["Operator_Assignment"].split("(")[0].strip(),
-                "Shift": "A",
-                "Decision": "Mandatory Safety Lockout",
-                "Safety_Override": "Yes",
-                "Planned_Stop_Min": opt_a_mins,
-                "Unplanned_Downtime_Min": 0.0,
-                "OptionA_Total_PKR": opt_a_total,
-                "OptionB_Total_PKR": 0.0,
-                "Net_Avoided_Loss_PKR": 0.0,
-                "Production_Hours_Rescued": 0.0,
-                "Notes": f"Statutory Safety Lockout enforced for {active_error['Failure_Mode']}. Prohibited Option B.",
-            }
-            st.session_state.history_log.insert(0, new_event)
-            st.session_state.kpi_totals["safety_overrides"] += 1
-            st.session_state.active_fault_machine = None
-            st.session_state.last_rectified = curr_machine_id
-            st.session_state.last_rectified_savings = 0.0
-            st.toast(f"🛑 Statutory safety lockout executed for {curr_machine_id}. Safe isolation logged.", icon="🛑")
-            st.rerun()
-
-    else:
-        action_col1, action_col2 = st.columns([1, 1])
-
-        with action_col1:
-            if st.button(
-                f"✅ Accept Option A: Schedule Immediate Stoppage ({opt_a_mins:.0f} min)",
-                type="primary",
-                use_container_width=True,
-            ):
-                net_val = opt_b_total - opt_a_total
-                rescued_hrs = (opt_b_mins - opt_a_mins) / 60.0
-
-                new_event = {
-                    "Event_Date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                    "Month_Key": "2026-09",
-                    "Machine_ID": curr_machine_id,
-                    "Error_ID": active_error["Error_ID"],
-                    "Stage": machine_meta["Stage"],
-                    "Failure_Category": active_error.get("Failure_Category", "Mechanical"),
-                    "Failure_Mode": active_error["Failure_Mode"],
-                    "Reported_By": machine_meta["Operator_Assignment"].split("(")[0].strip(),
-                    "Shift": "A",
-                    "Decision": "Accept Option A",
-                    "Safety_Override": "No",
-                    "Planned_Stop_Min": opt_a_mins,
-                    "Unplanned_Downtime_Min": opt_b_mins,
-                    "OptionA_Total_PKR": opt_a_total,
-                    "OptionB_Total_PKR": opt_b_total,
-                    "Net_Avoided_Loss_PKR": net_val,
-                    "Production_Hours_Rescued": rescued_hrs,
-                    "Notes": f"Preventative stop approved: Saved PKR {net_val:,.0f} and {rescued_hrs:.1f} hrs.",
-                }
-                st.session_state.history_log.insert(0, new_event)
-
-                st.session_state.kpi_totals["net_loss_avoided"] += net_val
-                st.session_state.kpi_totals["hours_rescued"] += rescued_hrs
-                st.session_state.kpi_totals["stops_approved"] += 1
-
-                st.session_state.monthly_summary["2026-09"]["planned"] += opt_a_total
-                st.session_state.monthly_summary["2026-09"]["exposure"] += opt_b_total
-                st.session_state.monthly_summary["2026-09"]["net"] += net_val
-                st.session_state.monthly_summary["2026-09"]["hours"] += rescued_hrs
-
-                # RESUME FULL PLANT OPERATIONS
-                st.session_state.active_fault_machine = None
-                st.session_state.last_rectified = curr_machine_id
-                st.session_state.last_rectified_savings = net_val
-                st.toast(f"✅ Option A Executed: {curr_machine_id} repaired! Normal factory flow resumed at 100 pkts/hr. PKR {net_val:,.0f} preserved!", icon="🎉")
-                st.rerun()
-
-        with action_col2:
-            with st.expander("⚠️ Defer: Continue Running (Log Risk to Shift Handover)"):
-                defer_reason = st.text_input(
-                    "Mandatory Operational Justification for Deferral:",
-                    placeholder="e.g. Critical customer shipment quota pending on current shift...",
-                    key="input_defer_reason",
-                )
-                if st.button("Confirm Deferral & Register Exposure", type="secondary", use_container_width=True):
-                    if not defer_reason.strip():
-                        st.error("Operational justification is mandatory before logging a deferral.")
-                    else:
-                        new_event = {
-                            "Event_Date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                            "Month_Key": "2026-09",
-                            "Machine_ID": curr_machine_id,
-                            "Error_ID": active_error["Error_ID"],
-                            "Stage": machine_meta["Stage"],
-                            "Failure_Category": active_error.get("Failure_Category", "Mechanical"),
-                            "Failure_Mode": active_error["Failure_Mode"],
-                            "Reported_By": machine_meta["Operator_Assignment"].split("(")[0].strip(),
-                            "Shift": "A",
-                            "Decision": "Deferred (Run-to-Fail Risk)",
-                            "Safety_Override": "No",
-                            "Planned_Stop_Min": 0,
-                            "Unplanned_Downtime_Min": opt_b_mins,
-                            "OptionA_Total_PKR": 0.0,
-                            "OptionB_Total_PKR": opt_b_total,
-                            "Net_Avoided_Loss_PKR": -opt_b_total,
-                            "Production_Hours_Rescued": 0.0,
-                            "Notes": f"DEFERRED BY OPERATOR. Justification: {defer_reason.strip()}",
-                        }
-                        st.session_state.history_log.insert(0, new_event)
-                        st.session_state.active_fault_machine = None
-                        st.session_state.last_rectified = None
-                        st.warning(f"⚠️ Deferral registered. Active exposure of PKR {opt_b_total:,.0f} logged to shift handover.")
-                        st.rerun()
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # 6. RETURN BUTTON AT BOTTOM OF SCREEN 3
-    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+    # RETURN BUTTON AT BOTTOM OF SCREEN 3
+    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
     if st.button("⬅ Return to Executive Dashboard", key="btn_bottom_back_dash", use_container_width=True):
         st.session_state.current_screen = "dashboard"
         st.rerun()
 
 # -----------------------------------------------------------------------------
-# 15. FOOTER
+# 6. FOOTER
 # -----------------------------------------------------------------------------
 st.markdown(
     """
